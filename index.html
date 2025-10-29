@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0e27">
+    <meta name="description" content="VoxFlix - Lecteur de Streaming Anime">
+    <title>VoxFlix</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff 0%, #0080ff 50%, #ff00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo:hover {
+            filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 10px rgba(0, 128, 255, 0.6));
+            letter-spacing: 5px;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.6));
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .install-btn {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        }
+
+        .install-btn.hidden {
+            display: none;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .anime-header {
+            background-size: cover;
+            background-position: center;
+            padding: 60px 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            gap: 30px;
+        }
+
+        .anime-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.65);
+            z-index: 1;
+        }
+
+        .anime-logo {
+            position: relative;
+            z-index: 2;
+            max-width: 420px;   /* Logo plus large */
+            max-height: 500px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        .anime-header-info {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .anime-header-info h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .anime-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .anime-btn {
+            padding: 15px 30px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .anime-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .anime-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            border-color: #00ffff;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .seasons-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .season-btn {
+            padding: 10px 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .season-btn.active {
+            background: linear-gradient(135deg, #00ffff, #0080ff);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 255, 255, 0.2);
+            transition: 0.4s;
+            border-radius: 30px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 2px;
+            background-color: #00ffff;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+            background-color: #0080ff;
+        }
+
+        .toggle-label {
+            color: #00ffff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .episode-card {
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .episode-card:hover {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .episode-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .episode-number {
+            font-size: 13px;
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .episode-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .player-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .player-modal.active {
+            display: flex;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 1100px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.4);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+        }
+
+        .player-info {
+            background: rgba(10, 14, 39, 0.95);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .player-title {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close-player {
+            background: linear-gradient(135deg, #ff0080, #ff00ff);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .close-player:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+        }
+
+        .no-video {
+            text-align: center;
+            padding: 60px;
+            color: #00ffff;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .anime-header {
+                padding: 30px 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .anime-logo {
+                max-width: 150px;
+            }
+
+            .episodes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .player-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .seasons-nav {
+                justify-content: center;
+            }
+
+            .toggle-container {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo/icon1.png" alt="VoxFlix">
+            <span>VoxFlix</span>
+        </div>
+        <div class="header-controls">
+            <button class="install-btn hidden" id="installBtn">📱 Installer</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="anime-selector">
+            <button class="anime-btn active" data-anime="hazbin">Hazbin Hotel</button>
+            <button class="anime-btn" data-anime="helluva">Helluva Boss</button>
+        </div>
+
+        <!-- Hazbin Hotel Section -->
+        <div class="content-section active" id="hazbin-section">
+            <div class="anime-header" id="hazbin-header">
+                <img src="https://via.placeholder.com/180x140?text=Hazbin" alt="Hazbin Hotel" class="anime-logo" id="hazbin-logo">
+                <div class="anime-header-info">
+                    <h1>Hazbin Hotel</h1>
+                </div>
+            </div>
+
+            <div class="controls-bar">
+                <div class="seasons-nav" id="hazbin-seasons"></div>
+                <div class="toggle-container">
+                    <span class="toggle-label">VF</span>
+                    <label class="toggle-switch" id="hazbin-toggle">
+                        <input type="checkbox" id="hazbin-lang-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">VOSTFR</span>
+                </div>
+            </div>
+
+            <div class="episodes-grid" id="hazbin-episodes"></div>
+        </div>
+
+        <!-- Helluva Boss Section -->
+        <div class="content-section" id="helluva-section">
+            <div class="anime-header" id="helluva-header">
+                <img src="https://via.placeholder.com/180x140?text=Helluva" alt="Helluva Boss" class="anime-logo" id="helluva-logo">
+                <div class="anime-header-info">
+                    <h1>Helluva Boss</h1>
+                </div>
+            </div>
+
+            <div class="controls-bar">
+                <div class="seasons-nav" id="helluva-seasons"></div>
+            </div>
+
+            <div class="episodes-grid" id="helluva-episodes"></div>
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div class="player-modal" id="playerModal">
+        <div class="player-container">
+            <video id="videoPlayer" controls playsinline></video>
+            <div class="player-info">
+                <div class="player-title" id="playerTitle">Épisode</div>
+                <button class="close-player" id="closePlayer">✕ Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW registration failed:', err));
+        }
+
+        // Install PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden');
+        });
+
+        if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+            installBtn.classList.add('hidden');
+        }
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                if (outcome === 'accepted') {
+                    installBtn.classList.add('hidden');
+                }
+            }
+        });
+
+        // Video Data
+        const videos = {
+            hazbin: {
+                name: "Hazbin Hotel",
+                saisons: {
+                    1: {
+                        background: 'https://images2.alphacoders.com/134/1348359.jpeg',
+                        logo: 'logo/Hazbin-Hotel-Logo.png',
+                        episodes: {
+                            1: {
+                                VF: 'https://cold8.gofile.io/download/direct/f813c55e-facf-4e74-b291-bad048721f64/Hazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4',
+                                VOSTFR: 'https://cold2.gofile.io/download/direct/1e24501c-0f30-4925-8a7f-713020f8af63/%5BVOSTFR%5DHazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4'
+                            },
+                            2: {
+                                VF: 'https://cold-na-phx-2.gofile.io/download/direct/68c3dbb5-3405-4163-91c9-3311dbc4366a/Hazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4',
+                                VOSTFR: 'https://cold8.gofile.io/download/direct/175be20b-b002-42cd-b7b1-4afc27d0ac45/%5BVOSTFR%5DHazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4'
+                            },
+                            3: {
+                                VF: 'https://cold8.gofile.io/download/direct/321efd47-526d-46eb-a0af-7227c609697b/Hazbin%20Hotel%20S01e03%20Oeufs%20Brouill%C3%A9s.mp4',
+                                VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/9c175380-7011-41e5-8bcf-2778b985b67d/%5BVOSTFR%5DHazbin%20Hotel%20S01e03%20Oeufs%20Brouill%C3%A9s.mp4'
+                            },
+                            4: {
+                                VF: 'https://cold4.gofile.io/download/direct/6187b010-4c33-4938-91ee-11eb68e2a288/Hazbin%20Hotel%20S01e04%20Mascarade.mp4',
+                                VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/74bce63b-9c1b-4a6d-8230-ee572424333f/%5BVOSTFR%5DHazbin%20Hotel%20S01e04%20Mascarade.mp4'
+                            },
+                            5: {
+                                VF: 'https://cold2.gofile.io/download/direct/2ec7cfd9-29f4-4752-bd15-a5035c79ed03/Hazbin%20Hotel%20S01e05%20Lucifer%20Entre%20En%20Sc%C3%A8ne.mp4',
+                                VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/73583f43-07c8-4b97-8253-4055ba618655/%5BVOSTFR%5DHazbin%20Hotel%20S01e05%20Lucifer%20entre%20en%20sc%C3%A8ne.mp4'
+                            },
+                            6: {
+                                VF: 'https://cold8.gofile.io/download/direct/b5d92f58-b8b4-48ec-9287-00a71453b43d/Hazbin%20Hotel%20S01e06%20Sur%20Les%20Chemins%20De%20La%20R%C3%A9demption.mp4',
+                                VOSTFR: 'https://cold4.gofile.io/download/direct/8fccfa23-01d5-4de7-b367-16a79431319a/%5BVOSTFR%5DHazbin%20Hotel%20S01e06%20Sur%20Les%20Chemins%20De%20La%20R%C3%A9demption.mp4'
+                            },
+                            7: {
+                                VF: 'https://cold8.gofile.io/download/direct/0580c875-640b-4c6a-9201-8987f383b31b/Hazbin%20Hotel%20S01e07%20Hello%20Rosie!.mp4',
+                                VOSTFR: 'https://cold-na-phx-2.gofile.io/download/direct/02262a23-1f55-407c-884d-ea419d8134e3/%5BVOSTFR%5DHazbin%20Hotel%20S01e07%20Hello%20Rosie!.mp4'
+                            },
+                            8: {
+                                VF: 'https://cold-na-phx-2.gofile.io/download/direct/4ff992e8-7d8d-4775-b762-b3d7f8e1a2a4/Hazbin%20Hotel%20S01e08%20Le%20grand%20final.mp4',
+                                VOSTFR: 'https://cold8.gofile.io/download/direct/483a7d0f-71e6-4f25-9dea-fdfd861035c4/%5BVOSTFR%5DHazbin%20Hotel%20S01e08%20Le%20Grand%20Final.mp4'
+                            }
+                        }
+                    },
+                    2: {
+                        background: 'https://images6.alphacoders.com/128/1285870.jpg',
+                        logo: 'logo/videoframe_13152.png',
+                        episodes: {
+                            1: {
+                                VF: 'https://store10.gofile.io/download/direct/57ed1de3-c7d8-4bfb-9c67-8cd486d77023/S02E001_Pentious%20au%20Paradis.mp4',
+                                VOSTFR: 'https://store1.gofile.io/download/direct/fbaa37e6-5207-4dbf-8cd5-b6e60ee45ec6/S02E001_Pentious%20au%20Paradis.mp4'
+                            },
+                            2: {
+                                VF: 'https://store5.gofile.io/download/direct/d29f6629-b713-4da6-a1a6-e78671ede900/S02E002_Lhistoire%20de%20Pentious.mp4',
+                                VOSTFR: 'https://store-eu-par-6.gofile.io/download/direct/033fdea1-68d0-405a-88d6-6a2512bf3b38/S02E002_Lhistoire%20de%20Pentious.mp4'
+                            },
+                            3: {
+                                VF: '',
+                                VOSTFR: ''
+                            },
+                            4: {
+                                VF: '',
+                                VOSTFR: ''
+                            },
+                            5: {
+                                VF: '',
+                                VOSTFR: ''
+                            },
+                            6: {
+                                VF: '',
+                                VOSTFR: ''
+                            },
+                            7: {
+                                VF: '',
+                                VOSTFR: ''
+                            },
+                            8: {
+                                VF: '',
+                                VOSTFR: ''
+                            }
+                        }
+                        
+                    }
+                }
+            },
+            helluva: {
+                name: "Helluva Boss",
+                saisons: {
+                    0: {
+                        background: 'https://images5.alphacoders.com/124/1246054.jpg',
+                        logo: 'logo/Helluva_Boss_transparent_logo.webp',
+                        episodes: {
+                            1: {
+                                VF: 'https://store-eu-par-1.gofile.io/download/direct/9999bcf7-ccf6-4c61-990d-d8e914f809db/clean_S01E001_MISSION%20Z%C3%89RO.mp4',
+                                VOSTFR: ''
+                            }
+                        }
+                    },
+                    1: {
+                        background: 'https://images5.alphacoders.com/124/1246054.jpg',
+                        logo: 'logo/Helluva_Boss_transparent_logo.webp',
+                        episodes: {
+                            1: { VF: 'https://store5.gofile.io/download/direct/fd0e9d3c-7b6c-42a7-8544-7df3a7606454/new_S02E001_Une%20famille%20sanguinaire.mp4', VOSTFR: '' },
+                            2: { VF: 'https://store-eu-par-3.gofile.io/download/direct/46b43239-6d3b-4b1b-8815-d353837c0145/new_S02E002_Loo%20Loo%20Land.mp4', VOSTFR: '' },
+                            3: { VF: 'https://store5.gofile.io/download/direct/3afd5734-2d02-4369-9d09-b41efeece3bf/new_S02E003_Duel%20de%20d%C3%A9mons.mp4', VOSTFR: '' },
+                            4: { VF: 'https://store-eu-par-3.gofile.io/download/direct/b74d6870-6d2d-4300-bbad-f1c642554637/new_S02E004_CHERUB.mp4', VOSTFR: '' },
+                            5: { VF: 'https://store5.gofile.io/download/direct/b6be085b-3b81-41ce-9212-734b4a3f7aff/new_S02E005_Le%20Festival%20de%20la%20Lune%20des%20Moissons.mp4', VOSTFR: '' },
+                            6: { VF: 'https://store-eu-par-3.gofile.io/download/direct/bbfa7f44-8764-4ee0-9ca6-c726f5438aa2/new_S02E006_Chasseurs%20de%20d%C3%A9mons.mp4', VOSTFR: '' },
+                            7: { VF: 'https://store5.gofile.io/download/direct/e5ff00cf-0610-4c5d-bde1-f7ee4adfa2a5/new_S02E007_Chez%20Ozzie.mp4', VOSTFR: '' },
+                            8: { VF: 'https://store5.gofile.io/download/direct/2ce4739e-57e0-49d9-a9db-b3d278c01b77/new_S02E008_Queen%20Bee.mp4', VOSTFR: '' }
+                        }
+                    },
+                    2: {
+                        background: 'https://images5.alphacoders.com/124/1246054.jpg',
+                        logo: 'logo/Helluva_Boss_transparent_logo.webp',
+                        episodes: {
+                            1: { VF: 'https://store5.gofile.io/download/direct/14f78d0e-1964-473c-b244-432850ca0312/new_S03E001_Le%20Cirque.mp4', VOSTFR: '' },
+                            2: { VF: 'https://store5.gofile.io/download/direct/db857323-2848-4483-97d4-96009aaa654f/new_S03E002_Sous%20les%20%C3%A9toiles.mp4', VOSTFR: '' },
+                            3: { VF: 'https://store5.gofile.io/download/direct/9e6b8d9b-7879-43f2-a15f-577b3f45f0a6/new_S03E003_Un%20ex%20pour%20deux.mp4', VOSTFR: '' },
+                            4: { VF: 'https://store5.gofile.io/download/direct/b18cfe0f-b61a-4455-87a8-ec54ff38b162/new_S03E004_Un%20air%20de%20western.mp4', VOSTFR: '' },
+                            5: { VF: 'https://store5.gofile.io/download/direct/0220c704-d945-462a-bcb0-fc7f9f0566ab/new_S03E005_Un%20Camp%20dEnfer.mp4', VOSTFR: '' },
+                            6: { VF: 'https://store5.gofile.io/download/direct/ced549b2-5da0-4758-a8a7-d48ac1eaa783/new_S03E006_Oups.mp4', VOSTFR: '' },
+                            7: { VF: 'https://store-eu-par-3.gofile.io/download/direct/e80ed01b-3de7-4daa-bf59-634e831019b4/new_S03E007_%C3%87a%20cest%20du%20spectacle.mp4', VOSTFR: '' },
+                            8: { VF: 'https://store5.gofile.io/download/direct/7420a991-a45d-4984-bbea-076a69a08074/new_S03E008_La%20Pleine%20lune.mp4', VOSTFR: '' },
+                            9: { VF: 'https://store5.gofile.io/download/direct/1c0aee47-e69f-48d3-9a6a-fe9fa44e9a8c/new_S03E009_La%20tourn%C3%A9e%20des%20excuses.mp4', VOSTFR: '' },
+                            10: { VF: 'https://store5.gofile.io/download/direct/ecdaaaca-2ae8-4432-9424-06e98b605e9f/new_S03E010_Baise%20O%20S%20Fant%C3%B4mes.mp4', VOSTFR: '' },
+                            11: { VF: 'https://store5.gofile.io/download/direct/13eca112-eaf3-439f-885d-1c16f42bd62e/new_S03E011_Le%20grand%20ma%C3%AEtre.mp4', VOSTFR: '' },
+                            12: { VF: 'https://store5.gofile.io/download/direct/423a0ac5-176b-4c5f-98c7-94c666b82700/new_S03E012_La%20f%C3%AAte%20des%20P%C3%A9ch%C3%A9s.mp4', VOSTFR: '' }
+                        }
+                    }
+                }
+            }
+        };
+
+        let currentAnime = 'hazbin';
+        let currentSeason = 1;
+        let currentLanguage = 'VF';
+
+        // Play video
+        function playVideo(url, title) {
+            if (!url) {
+                document.getElementById('playerModal').classList.add('active');
+                document.getElementById('playerModal').innerHTML = `
+                    <div class="player-container">
+                        <div class="no-video">
+                            <p>❌ Vidéo non disponible</p>
+                            <button class="close-player" onclick="document.getElementById('playerModal').classList.remove('active')">✕ Fermer</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = url;
+            document.getElementById('playerTitle').textContent = title;
+            document.getElementById('playerModal').classList.add('active');
+            
+            setTimeout(() => {
+                videoPlayer.play();
+            }, 100);
+        }
+
+        // Close player
+        document.getElementById('closePlayer').addEventListener('click', () => {
+            document.getElementById('playerModal').classList.remove('active');
+            document.getElementById('videoPlayer').pause();
+        });
+
+        document.getElementById('playerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'playerModal') {
+                document.getElementById('playerModal').classList.remove('active');
+                document.getElementById('videoPlayer').pause();
+            }
+        });
+
+        // Render episodes
+        function renderEpisodes() {
+            const saisonData = videos[currentAnime].saisons[currentSeason];
+            const container = document.getElementById(currentAnime + '-episodes');
+            container.innerHTML = '';
+
+            Object.keys(saisonData.episodes).forEach(epNum => {
+                const episode = saisonData.episodes[epNum];
+                const videoUrl = episode[currentLanguage];
+                const isDisabled = !videoUrl;
+
+                const card = document.createElement('div');
+                card.className = 'episode-card' + (isDisabled ? ' disabled' : '');
+                card.innerHTML = `
+                    <div class="episode-number">Épisode ${epNum}</div>
+                    <div class="episode-title">Ep. ${epNum}</div>
+                `;
+
+                if (!isDisabled) {
+                    card.addEventListener('click', () => {
+                        const serieName = videos[currentAnime].name;
+                        const seasonLabel = currentSeason === 0 ? 'Saison 0' : `Saison ${currentSeason}`;
+                        const langLabel = currentLanguage === 'VF' ? 'VF' : 'VOSTFR';
+                        playVideo(videoUrl, `${serieName} - ${seasonLabel} Épisode ${epNum} (${langLabel})`);
+                    });
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        // Setup Hazbin UI
+        function setupHazbin() {
+            const container = document.getElementById('hazbin-seasons');
+            container.innerHTML = '';
+
+            Object.keys(videos.hazbin.saisons).forEach(season => {
+                const btn = document.createElement('button');
+                btn.className = 'season-btn' + (season == 1 ? ' active' : '');
+                btn.textContent = `Saison ${season}`;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#hazbin-seasons .season-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentSeason = parseInt(season);
+                    updateHazbinHeader();
+                    renderEpisodes();
+                });
+                container.appendChild(btn);
+            });
+
+            document.getElementById('hazbin-lang-toggle').addEventListener('change', (e) => {
+                currentLanguage = e.target.checked ? 'VOSTFR' : 'VF';
+                renderEpisodes();
+            });
+
+            currentSeason = 1;
+            currentLanguage = 'VF';
+            updateHazbinHeader();
+            renderEpisodes();
+        }
+
+        function updateHazbinHeader() {
+            const header = document.getElementById('hazbin-header');
+            const saisonData = videos.hazbin.saisons[currentSeason];
+            header.style.backgroundImage = `url('${saisonData.background}')`;
+            if (saisonData.logo) {
+                document.getElementById('hazbin-logo').src = saisonData.logo;
+            }
+        }
+
+        // Setup Helluva UI
+        function setupHelluva() {
+            const container = document.getElementById('helluva-seasons');
+            container.innerHTML = '';
+
+            Object.keys(videos.helluva.saisons).forEach((season, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'season-btn' + (idx === 0 ? ' active' : '');
+                btn.textContent = season == 0 ? 'Saison 0' : `Saison ${season}`;
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#helluva-seasons .season-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentSeason = parseInt(season);
+                    updateHelluvaBossHeader();
+                    renderEpisodes();
+                });
+                container.appendChild(btn);
+            });
+
+            currentSeason = 0;
+            updateHelluvaBossHeader();
+            renderEpisodes();
+        }
+
+        function updateHelluvaBossHeader() {
+            const header = document.getElementById('helluva-header');
+            const saisonData = videos.helluva.saisons[currentSeason];
+            header.style.backgroundImage = `url('${saisonData.background}')`;
+            if (saisonData.logo) {
+                document.getElementById('helluva-logo').src = saisonData.logo;
+            }
+        }
+
+        // Anime selector
+        document.querySelectorAll('.anime-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.anime-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                currentAnime = btn.dataset.anime;
+                document.getElementById(currentAnime + '-section').classList.add('active');
+
+                if (currentAnime === 'hazbin') {
+                    setupHazbin();
+                } else {
+                    setupHelluva();
+                }
+            });
+        });
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            setupHazbin();
+        });
+    </script>
+</body>
+</html>
