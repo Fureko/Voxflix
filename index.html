@@ -1,657 +1,1212 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoxFlix - Streaming</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --neon-cyan: #00d9ff;
-            --neon-blue: #0066ff;
-            --bg-dark: #0a0e1a;
-            --bg-card: #1a1f2e;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            overflow-x: hidden;
-        }
-
-        /* Header */
-        header {
-            background: rgba(26, 31, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        h1 {
-            font-size: 2rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-back {
-            background: rgba(0, 217, 255, 0.2);
-            color: var(--text-primary);
-        }
-
-        .btn-back:hover {
-            background: rgba(0, 217, 255, 0.3);
-        }
-
-        .btn-lang {
-            background: rgba(0, 217, 255, 0.2);
-            color: var(--neon-cyan);
-            min-width: 80px;
-        }
-
-        .btn-lang:hover {
-            background: rgba(0, 217, 255, 0.3);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Grid layouts */
-        .grid-series {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-        }
-
-        .grid-seasons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .grid-episodes {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-        }
-
-        /* Cards */
-        .card-serie {
-            position: relative;
-            height: 300px;
-            border-radius: 1rem;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .card-serie:hover {
-            transform: scale(1.05);
-        }
-
-        .card-serie img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .card-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.3));
-            display: flex;
-            align-items: flex-end;
-            padding: 2rem;
-        }
-
-        .card-title {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .card-season {
-            position: relative;
-            height: 200px;
-            border-radius: 1rem;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid rgba(0, 217, 255, 0.2);
-            transition: all 0.3s;
-        }
-
-        .card-season:hover {
-            border-color: rgba(0, 217, 255, 0.6);
-            transform: scale(1.05);
-        }
-
-        .card-episode {
-            background: var(--bg-card);
-            border-radius: 0.75rem;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .card-episode:hover {
-            box-shadow: 0 0 0 2px var(--neon-cyan);
-        }
-
-        .episode-thumb {
-            height: 150px;
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 102, 255, 0.2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .episode-thumb video {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.6;
-        }
-
-        .episode-thumb-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 1;
-        }
-
-        .play-icon {
-            width: 60px;
-            height: 60px;
-            color: var(--neon-cyan);
-            transition: transform 0.3s;
-            position: relative;
-            z-index: 2;
-            filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.5));
-        }
-
-        .card-episode:hover .play-icon {
-            transform: scale(1.2);
-        }
-
-        .episode-number {
-            position: absolute;
-            top: 0.5rem;
-            left: 0.5rem;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            z-index: 2;
-        }
-
-        .episode-info {
-            padding: 1rem;
-        }
-
-        .episode-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .episode-langs {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .lang-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .lang-vf {
-            background: rgba(0, 217, 255, 0.2);
-            color: var(--neon-cyan);
-        }
-
-        .lang-vostfr {
-            background: rgba(0, 102, 255, 0.2);
-            color: var(--neon-blue);
-        }
-
-        /* Loader */
-        .loader-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(0, 217, 255, 0.2);
-            border-top-color: var(--neon-cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Player */
-        .player-container {
-            position: fixed;
-            inset: 0;
-            background: #000;
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-        }
-
-        video {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .exit-player-btn {
-            position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid rgba(0, 217, 255, 0.5);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-        }
-
-        .exit-player-btn:hover {
-            background: rgba(0, 217, 255, 0.2);
-            border-color: var(--neon-cyan);
-        }
-
-        .player-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 2rem;
-        }
-
-        .timeline {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .timeline-progress {
-            height: 100%;
-            background: var(--neon-cyan);
-            border-radius: 4px;
-            position: relative;
-        }
-
-        .timeline-handle {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translate(50%, -50%);
-            width: 16px;
-            height: 16px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .timeline:hover .timeline-handle {
-            opacity: 1;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .controls-left, .controls-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .control-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .control-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .volume-slider {
-            width: 0;
-            opacity: 0;
-            transition: all 0.3s;
-        }
-
-        .volume-container:hover .volume-slider {
-            width: 80px;
-            opacity: 1;
-        }
-
-        .time-display {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .episode-meta {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            opacity: 0.8;
-        }
-
-        .next-episode-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            text-align: center;
-        }
-
-        .lang-selector-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            min-width: 350px;
-            z-index: 150;
-        }
-
-        .lang-option {
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background: rgba(0, 217, 255, 0.1);
-            border: 2px solid rgba(0, 217, 255, 0.3);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .lang-option:hover:not(.disabled) {
-            background: rgba(0, 217, 255, 0.2);
-            border-color: var(--neon-cyan);
-        }
-
-        .lang-option.active {
-            background: rgba(0, 217, 255, 0.3);
-            border-color: var(--neon-cyan);
-        }
-
-        .lang-option.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .btn-next {
-            background: var(--neon-cyan);
-            color: #000;
-            padding: 1rem 2rem;
-            margin-top: 1rem;
-        }
-
-        .btn-next:hover {
-            background: var(--neon-blue);
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255, 255, 255, 0.3);
-            height: 4px;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .grid-series, .grid-seasons {
-                grid-template-columns: 1fr;
-            }
-            
-            .grid-episodes {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-            
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-            
-            .lang-selector-overlay {
-                min-width: 90%;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>VoxFlix — Streaming</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+    --bg: #07080d;
+    --bg-elev: #0f1119;
+    --bg-card: #14172310;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.16);
+    --text: #f5f5f7;
+    --text-dim: #a8a8b3;
+    --text-muted: #6b6b78;
+    --accent: #44ffff;
+    --accent-glow: rgba(68,255,255,0.35);
+    --accent-soft: rgba(68,255,255,0.12);
+    --hazbin: #ff2d6f;
+    --helluva: #e63946;
+    --display: 'Fraunces', 'Times New Roman', serif;
+    --body: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+body {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(68,255,255,0.08), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,45,111,0.04), transparent 60%);
+    background-attachment: fixed;
+}
+
+/* Subtle film grain */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+button, a { font-family: inherit; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ============= HEADER ============= */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: calc(0.9rem + var(--safe-top)) 1.5rem 0.9rem;
+    background: linear-gradient(to bottom, rgba(7,8,13,0.95), rgba(7,8,13,0.6));
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.logo {
+    font-family: var(--display);
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    background: linear-gradient(135deg, #fff 0%, #fff 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo:hover { transform: scale(1.04); }
+
+.logo .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 4px;
+    box-shadow: 0 0 12px var(--accent-glow);
+    vertical-align: middle;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.icon-btn:hover, .icon-btn:active {
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+}
+
+.icon-btn svg { width: 18px; height: 18px; }
+
+.btn-back {
+    border-radius: 999px;
+    padding: 0 1rem;
+    height: 40px;
+    width: auto;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-back svg { width: 16px; height: 16px; }
+
+.hidden { display: none !important; }
+
+/* ============= MAIN ============= */
+main {
+    position: relative;
+    z-index: 2;
+    padding-bottom: calc(3rem + var(--safe-bottom));
+}
+
+/* ============= HERO (series view) ============= */
+.hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 6rem 1.5rem 2rem;
+    overflow: hidden;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1);
+    filter: saturate(1.1) brightness(0.7);
+    animation: heroZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes heroZoom {
+    from { transform: scale(1.1) translateX(0); }
+    to { transform: scale(1.18) translateX(-2%); }
+}
+
+.hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to top, var(--bg) 0%, rgba(7,8,13,0.7) 30%, transparent 70%),
+        linear-gradient(to right, rgba(7,8,13,0.85) 0%, rgba(7,8,13,0.4) 50%, transparent 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.hero-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+}
+
+.hero-title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+}
+
+.hero-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+}
+
+.hero-sub {
+    color: var(--text-dim);
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    line-height: 1.6;
+    max-width: 540px;
+}
+
+/* ============= SECTION ============= */
+.section {
+    padding: 3rem 1.5rem 1rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.section-title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    letter-spacing: -0.02em;
+}
+
+.section-title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-dim);
+}
+
+.section-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+/* ============= SERIES CARDS ============= */
+.series-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 1.25rem;
+}
+
+.serie-card {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease,
+                box-shadow 0.4s ease;
+    will-change: transform;
+}
+
+.serie-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-strong);
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6);
+}
+
+.serie-card-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.serie-card-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.1) brightness(0.85);
+}
+
+.serie-card:hover .serie-card-bg { transform: scale(1.06); }
+
+.serie-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.75rem;
+}
+
+.serie-logo-wrap {
+    height: 90px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-end;
+    filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+}
+
+.serie-logo-wrap img {
+    max-height: 100%;
+    max-width: 70%;
+    object-fit: contain;
+    object-position: left bottom;
+}
+
+.serie-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.serie-tag {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.serie-tag.accent { background: var(--accent); color: #000; }
+
+.serie-cta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 500;
+    transition: transform 0.3s ease;
+}
+
+.serie-card:hover .serie-cta { transform: translateX(4px); }
+
+/* ============= SEASONS ============= */
+.seasons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1rem;
+}
+
+.season-card {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.season-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-soft);
+    box-shadow: 0 20px 50px -10px rgba(68,255,255,0.15);
+}
+
+.season-card-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s ease;
+}
+
+.season-card:hover .season-card-bg { transform: scale(1.08); }
+
+.season-card-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.1) brightness(0.7);
+}
+
+.season-card-content {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.2) 50%, transparent);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.season-num {
+    font-family: var(--display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: 4.5rem;
+    line-height: 1;
+    color: rgba(255,255,255,0.95);
+    letter-spacing: -0.05em;
+}
+
+.season-num small {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-style: normal;
+    font-family: var(--body);
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+}
+
+.season-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.season-info-text {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.season-info-text strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* ============= EPISODES ============= */
+.episodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.episode-row {
+    display: grid;
+    grid-template-columns: auto 200px 1fr auto;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 0.875rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.episode-row:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-hover);
+    transform: translateX(4px);
+}
+
+.episode-row.watched {
+    opacity: 0.65;
+}
+
+.episode-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    transition: width 0.3s;
+}
+
+.episode-num {
+    font-family: var(--display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: 2rem;
+    color: var(--text-muted);
+    line-height: 1;
+    width: 2.5rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.episode-row:hover .episode-num { color: var(--accent); }
+
+.episode-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-elev);
+    flex-shrink: 0;
+}
+
+.episode-thumb video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.3s, transform 0.6s ease;
+}
+
+.episode-row:hover .episode-thumb video {
+    opacity: 1;
+    transform: scale(1.06);
+}
+
+.episode-thumb-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(68,255,255,0.1), rgba(255,45,111,0.05));
+    color: var(--text-muted);
+}
+
+.episode-play-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.episode-row:hover .episode-play-overlay { opacity: 1; }
+
+.episode-play-overlay svg {
+    width: 36px;
+    height: 36px;
+    color: var(--accent);
+    filter: drop-shadow(0 0 12px var(--accent-glow));
+}
+
+.episode-info { min-width: 0; }
+
+.episode-title {
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.episode-tags {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.lang-pill {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(68,255,255,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(68,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+}
+
+.lang-pill.vostfr {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border-color: var(--border);
+}
+
+.episode-action {
+    color: var(--text-muted);
+    transition: color 0.3s, transform 0.3s;
+}
+
+.episode-row:hover .episode-action {
+    color: var(--accent);
+    transform: translateX(2px);
+}
+
+/* ============= LOADER ============= */
+.loader-wrap {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loader {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+}
+
+/* ============= PLAYER ============= */
+.player {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+}
+
+.player video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.player-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: calc(1.25rem + var(--safe-top)) 1.5rem 4rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    transition: opacity 0.4s ease;
+    gap: 1rem;
+}
+
+.player-title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.player-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 4rem 1.5rem calc(1.25rem + var(--safe-bottom));
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 10;
+    transition: opacity 0.4s ease;
+}
+
+.player.hide-controls .player-top,
+.player.hide-controls .player-bottom { opacity: 0; pointer-events: none; }
+
+.timeline {
+    position: relative;
+    height: 14px;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-track {
+    position: relative;
+    height: 4px;
+    width: 100%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    overflow: visible;
+    transition: height 0.2s ease;
+}
+
+.timeline:hover .timeline-track { height: 6px; }
+
+.timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #88ffff);
+    border-radius: 4px;
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.timeline-handle {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent-glow);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.timeline:hover .timeline-handle { transform: translate(-50%, -50%) scale(1); }
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.controls-group {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.player-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.player-btn:hover { background: rgba(255,255,255,0.1); }
+.player-btn svg { width: 22px; height: 22px; }
+
+.player-btn.primary {
+    width: 52px;
+    height: 52px;
+}
+.player-btn.primary svg { width: 28px; height: 28px; }
+
+.time-display {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+.volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.volume-slider {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.volume-wrap:hover .volume-slider { width: 80px; }
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    height: 4px;
+    width: 100%;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: rgba(255,255,255,0.25);
+    height: 4px;
+    border-radius: 2px;
+}
+input[type="range"]::-moz-range-track {
+    background: rgba(255,255,255,0.25);
+    height: 4px;
+    border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-top: -5px;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ============= OVERLAYS ============= */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1.5rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.overlay-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.overlay-eyebrow {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.overlay-title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.lang-options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.lang-option {
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+}
+
+.lang-option:hover:not(.disabled) {
+    background: var(--surface-hover);
+    border-color: var(--border-strong);
+}
+
+.lang-option.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.lang-option.disabled { opacity: 0.4; cursor: not-allowed; }
+
+.lang-option-label { font-weight: 500; font-size: 0.95rem; }
+.lang-option-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+.btn-cta {
+    padding: 0.85rem 2rem;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
+
+.btn-secondary {
+    padding: 0.85rem 1.75rem;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 0.5rem;
+    width: 100%;
+}
+
+.btn-secondary:hover { background: var(--surface-hover); }
+
+.resume-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 1.75rem;
+    max-width: 360px;
+}
+
+.resume-time {
+    color: var(--accent);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.25rem;
+    margin: 0.5rem 0 1.25rem;
+}
+
+.resume-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* ============= RESPONSIVE ============= */
+@media (max-width: 768px) {
+    header { padding: calc(0.75rem + var(--safe-top)) 1rem 0.75rem; }
+    .logo { font-size: 1.25rem; }
+    .icon-btn { width: 38px; height: 38px; }
+    .btn-back { padding: 0 0.85rem; height: 38px; font-size: 0.8rem; }
+    
+    .hero {
+        min-height: 60vh;
+        padding: 4rem 1rem 1.5rem;
+    }
+    
+    .section { padding: 2rem 1rem 0.5rem; }
+    
+    .series-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .serie-card { aspect-ratio: 16 / 11; }
+    .serie-logo-wrap { height: 70px; }
+    
+    .seasons-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    .season-card-content { padding: 1rem; }
+    .season-num { font-size: 3rem; }
+    .season-num small { font-size: 0.6rem; letter-spacing: 0.2em; }
+    
+    .episode-row {
+        grid-template-columns: auto 120px 1fr auto;
+        gap: 0.75rem;
+        padding: 0.6rem;
+    }
+    .episode-num { font-size: 1.5rem; width: 1.75rem; }
+    .episode-title { font-size: 0.9rem; }
+    .lang-pill { font-size: 0.6rem; padding: 0.15rem 0.45rem; }
+    
+    .player-top { padding: calc(0.85rem + var(--safe-top)) 1rem 3rem; }
+    .player-bottom { padding: 3rem 1rem calc(0.85rem + var(--safe-bottom)); }
+    .player-btn { width: 40px; height: 40px; }
+    .player-btn svg { width: 20px; height: 20px; }
+    .time-display { font-size: 0.75rem; }
+    .volume-wrap { display: none; }
+}
+
+@media (max-width: 420px) {
+    .episode-row {
+        grid-template-columns: auto 90px 1fr;
+        gap: 0.6rem;
+    }
+    .episode-row .episode-action { display: none; }
+    .episode-num { font-size: 1.25rem; width: 1.5rem; }
+}
+
+@media (orientation: portrait) and (max-width: 768px) {
+    .hero { min-height: 55vh; }
+}
+
+@media (hover: none) {
+    .serie-card:hover, .season-card:hover, .episode-row:hover { transform: none; }
+    .episode-play-overlay { opacity: 0.6; }
+}
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-left">
-            <button id="backBtn" class="btn btn-back hidden">← Retour</button>
-            <h1>VoxFlix</h1>
-        </div>
-        <div>
-            <button id="langBtn" class="btn btn-lang hidden">VF</button>
-            <button id="homeBtn" class="btn btn-back" title="Accueil">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                </svg>
-            </button>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <div id="app">
-        <div class="loader-container">
-            <div class="loader"></div>
-        </div>
+<header>
+    <div class="header-left">
+        <button id="backBtn" class="icon-btn btn-back hidden" aria-label="Retour">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Retour</span>
+        </button>
+        <div class="logo" id="homeLogo">VoxFlix<span class="dot"></span></div>
+    </div>
+    <div class="header-right">
+        <button id="langBtn" class="icon-btn btn-back hidden" aria-label="Changer la langue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="langBtnText">VF</span>
+        </button>
+        <button id="homeBtn" class="icon-btn" aria-label="Accueil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+    </div>
+</header>
+
+<main id="app">
+    <div class="loader-wrap">
+        <div class="loader"></div>
+        <div class="loader-text">Chargement</div>
+    </div>
+</main>
+
+<!-- Player -->
+<div id="playerContainer" class="player hidden">
+    <div class="player-top">
+        <button id="exitBtn" class="icon-btn" aria-label="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="player-title" id="playerTitle"></div>
+        <div style="width:40px"></div>
     </div>
 
-    <!-- Video Player -->
-    <div id="playerContainer" class="player-container hidden">
-        <!-- Exit Button -->
-        <button id="exitPlayerBtn" class="exit-player-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Quitter le lecteur
-        </button>
+    <video id="videoPlayer" playsinline></video>
 
-        <video id="videoPlayer"></video>
-        
-        <div class="player-controls">
-            <div class="timeline" id="timeline">
+    <div class="player-bottom">
+        <div class="timeline" id="timeline">
+            <div class="timeline-track">
                 <div class="timeline-progress" id="timelineProgress">
                     <div class="timeline-handle"></div>
                 </div>
             </div>
-            <div class="controls-row">
-                <div class="controls-left">
-                    <button class="control-btn" id="playPauseBtn">
-                        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                        <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                        </svg>
+        </div>
+        <div class="controls">
+            <div class="controls-group">
+                <button class="player-btn primary" id="playPauseBtn" aria-label="Lecture/Pause">
+                    <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
+                </button>
+                <div class="volume-wrap">
+                    <button class="player-btn" id="muteBtn" aria-label="Muet">
+                        <svg id="volumeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                        <svg id="mutedIcon" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
                     </button>
-                    <div class="volume-container" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <button class="control-btn" id="muteBtn">
-                            <svg id="volumeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/>
-                            </svg>
-                            <svg id="mutedIcon" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/>
-                            </svg>
-                        </button>
-                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-                    </div>
-                    <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
                 </div>
-                <div class="controls-right">
-                    <button class="control-btn" id="langSelectorBtn" title="Changer la langue" style="display: none;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-                        </svg>
-                    </button>
-                    <a id="downloadBtn" class="control-btn" href="image.png" download title="Télécharger">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                        </svg>
-                    </a>
-                    <button class="control-btn" id="fullscreenBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
-                        </svg>
-                    </button>
-                </div>
+                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
             </div>
-            <div class="episode-meta" id="episodeMeta"></div>
-        </div>
-        
-        <!-- Next Episode Overlay -->
-        <div id="nextEpisodeOverlay" class="next-episode-overlay hidden">
-            <p style="font-size: 1.5rem; margin-bottom: 1rem;">Épisode terminé</p>
-            <button class="btn btn-next" id="nextEpisodeBtn">Épisode suivant</button>
-        </div>
-        
-        <!-- Language Selector Overlay -->
-        <div id="langSelectorOverlay" class="lang-selector-overlay hidden">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Sélectionner la langue</h3>
-            <div id="langOptions"></div>
-            <button class="btn btn-back" id="closeLangBtn" style="margin-top: 1rem; width: 100%;">Annuler</button>
+            <div class="controls-group">
+                <button class="player-btn" id="langSelectorBtn" aria-label="Changer la langue" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </button>
+                <a id="downloadBtn" class="player-btn" href="#" download aria-label="Télécharger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </a>
+                <button class="player-btn" id="fullscreenBtn" aria-label="Plein écran">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 
-    <script>
-// ============= DONNÉES =============
+    <!-- Resume Overlay -->
+    <div id="resumeOverlay" class="overlay hidden">
+        <div class="resume-card">
+            <div class="overlay-eyebrow">Reprendre la lecture</div>
+            <div class="overlay-title" id="resumeTitle">Épisode</div>
+            <div class="resume-time" id="resumeTime">0:00</div>
+            <div class="resume-actions">
+                <button class="btn-cta" id="resumeBtn" style="margin-top:0">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M8 5v14l11-7z"/></svg>
+                    Reprendre
+                </button>
+                <button class="btn-secondary" id="restartBtn">Recommencer du début</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lang Selector Overlay -->
+    <div id="langOverlay" class="overlay hidden">
+        <div class="overlay-card">
+            <div class="overlay-eyebrow">Audio</div>
+            <div class="overlay-title">Choisir la langue</div>
+            <div class="lang-options" id="langOptionsList"></div>
+            <button class="btn-secondary" id="closeLangBtn">Annuler</button>
+        </div>
+    </div>
+
+    <!-- Next Episode -->
+    <div id="nextOverlay" class="overlay hidden">
+        <div class="overlay-card">
+            <div class="overlay-eyebrow">Épisode terminé</div>
+            <div class="overlay-title">À suivre…</div>
+            <button class="btn-cta" id="nextEpisodeBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M8 5v14l11-7z"/></svg>
+                Épisode suivant
+            </button>
+            <button class="btn-secondary" id="closeNextBtn">Rester ici</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============= DATA =============
+const SERIES_META = {
+    hazbin: {
+        name: 'Hazbin Hotel',
+        tagline: 'Bienvenue au pire hôtel de l\'enfer.',
+        logo: './Hazbin-Hotel-Logo.png',
+        accent: '#ff2d6f'
+    },
+    helluva: {
+        name: 'Helluva Boss',
+        tagline: 'Une agence d\'assassinat un peu trop chaotique.',
+        logo: './Helluva_Boss_transparent_logo.webp',
+        accent: '#e63946'
+    }
+};
+
 const videos = {
     hazbin: {
-        name: "Hazbin Hotel",
+        name: 'Hazbin Hotel',
         saisons: {
             1: {
                 background: 'https://images2.alphacoders.com/134/1348359.jpeg',
-                logo: 'https://i.imgur.com/8Q9X8Mm.png',
                 episodes: {
                     1: { title: "Histoire De L'Enfer", VF: 'https://cold8.gofile.io/download/direct/f813c55e-facf-4e74-b291-bad048721f64/Hazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4', VOSTFR: 'https://cold2.gofile.io/download/direct/1e24501c-0f30-4925-8a7f-713020f8af63/%5BVOSTFR%5DHazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4' },
                     2: { title: "Radio Contre Vidéo", VF: 'https://cold-na-phx-2.gofile.io/download/direct/68c3dbb5-3405-4163-91c9-3311dbc4366a/Hazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4', VOSTFR: 'https://cold8.gofile.io/download/direct/175be20b-b002-42cd-b7b1-4afc27d0ac45/%5BVOSTFR%5DHazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4' },
@@ -665,7 +1220,6 @@ const videos = {
             },
             2: {
                 background: 'https://images6.alphacoders.com/128/1285870.jpg',
-                logo: 'https://i.imgur.com/8Q9X8Mm.png',
                 episodes: {
                     1: { title: "Pentious au Paradis", VF: 'https://cold2.gofile.io/download/direct/d6b94c60-903d-4bb2-8dd1-31188b7b57b2/S02E001_Pentious%20au%20Paradis.mp4', VOSTFR: 'https://store1.gofile.io/download/direct/fbaa37e6-5207-4dbf-8cd5-b6e60ee45ec6/S02E001_Pentious%20au%20Paradis.mp4' },
                     2: { title: "L'histoire de Pentious", VF: 'https://store5.gofile.io/download/direct/d29f6629-b713-4da6-a1a6-e78671ede900/S02E002_Lhistoire%20de%20Pentious.mp4', VOSTFR: 'https://store-eu-par-6.gofile.io/download/direct/033fdea1-68d0-405a-88d6-6a2512bf3b38/S02E002_Lhistoire%20de%20Pentious.mp4' },
@@ -674,22 +1228,20 @@ const videos = {
                     5: { title: "Réduite au Silence", VF: 'https://store1.gofile.io/download/direct/887f6b52-b255-40a9-8d7b-0d5216222ad3/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4', VOSTFR: 'https://store5.gofile.io/download/direct/47943cd0-a512-47c6-a344-50e94830fc6e/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4' },
                     6: { title: "Pluie hurlante", VF: 'https://store5.gofile.io/download/direct/f4090ab9-3eb5-4087-8145-ed6bab18e4cd/Hazbin%20Hotel_S02E06_Pluie%20hurlante.mp4', VOSTFR: 'https://store4.gofile.io/download/direct/3ba1769d-9afc-4b49-8a41-5ba291055a7f/Hazbin%20Hotel_S02E06_Pluie%20Hurlante.mp4' },
                     7: { title: "Arme De Destruction Massive", VF: 'https://store2.gofile.io/download/direct/5eff1f55-7988-441d-beff-460aa3f46b01/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VF.mp4', VOSTFR: 'https://store10.gofile.io/download/direct/a242db0b-3b78-4197-ad90-538dcae0ebd1/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VOTSFR.mp4' },
-                    8: { title: "Rappel", VF: 'https://store-eu-par-5.gofile.io/download/direct/f6b1c039-3f1d-4072-b06e-3ed1f6b26585/S02E008_Rappel%20VF.mp4', VOSTFR: 'https://store-eu-par-2.gofile.io/download/direct/5539c571-6b62-4d66-809a-0e1c6d5569eb/S02E008_Rappel%20VOSTFR.mp4' }
+                    8: { title: "Rappel", VF: 'https://cold-na-phx-7.gofile.io/download/direct/f6b1c039-3f1d-4072-b06e-3ed1f6b26585/S02E008_Rappel%20VF.mp4', VOSTFR: 'https://store-eu-par-2.gofile.io/download/direct/5539c571-6b62-4d66-809a-0e1c6d5569eb/S02E008_Rappel%20VOSTFR.mp4' }
                 }
             }
         }
     },
     helluva: {
-        name: "Helluva Boss",
+        name: 'Helluva Boss',
         saisons: {
             0: {
                 background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                logo: 'https://i.imgur.com/9yXq8Mm.png',
                 episodes: { 1: { title: "Mission Zéro", VF: 'https://store-eu-par-1.gofile.io/download/direct/9999bcf7-ccf6-4c61-990d-d8e914f809db/clean_S01E001_MISSION%20Z%C3%89RO.mp4' } }
             },
             1: {
                 background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                logo: 'https://i.imgur.com/9yXq8Mm.png',
                 episodes: {
                     1: { title: "Une famille sanguinaire", VF: 'https://store5.gofile.io/download/direct/fd0e9d3c-7b6c-42a7-8544-7df3a7606454/new_S02E001_Une%20famille%20sanguinaire.mp4' },
                     2: { title: "Loo Loo Land", VF: 'https://store-eu-par-3.gofile.io/download/direct/46b43239-6d3b-4b1b-8815-d353837c0145/new_S02E002_Loo%20Loo%20Land.mp4' },
@@ -703,7 +1255,6 @@ const videos = {
             },
             2: {
                 background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                logo: 'https://i.imgur.com/9yXq8Mm.png',
                 episodes: {
                     1: { title: "Le Cirque", VF: 'https://store5.gofile.io/download/direct/14f78d0e-1964-473c-b244-432850ca0312/new_S03E001_Le%20Cirque.mp4' },
                     2: { title: "Sous les étoiles", VF: 'https://store5.gofile.io/download/direct/db857323-2848-4483-97d4-96009aaa654f/new_S03E002_Sous%20les%20%C3%A9toiles.mp4' },
@@ -724,20 +1275,46 @@ const videos = {
 };
 
 // ============= STATE =============
-let currentView = 'series';
+let view = 'series';
 let currentSerie = null;
 let currentSeason = null;
 let currentEpisode = null;
-let currentLanguage = localStorage.getItem('voxflix_lang') || 'VF';
-let data = null;
+let lang = localStorage.getItem('voxflix_lang') || 'VF';
+let pendingResume = null;
+let controlsTimer = null;
 
-// ============= DOM ELEMENTS =============
+// ============= STORAGE HELPERS =============
+const PROGRESS_KEY = 'voxflix_progress_v2';
+const RESUME_THRESHOLD = 10; // seconds — below this, don't bother saving
+const COMPLETED_THRESHOLD = 0.92; // 92% watched = complete
+
+function getProgress() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); }
+    catch { return {}; }
+}
+function saveProgress(serie, season, ep, time, duration) {
+    const p = getProgress();
+    const key = `${serie}_${season}_${ep}`;
+    if (time < RESUME_THRESHOLD || !duration) { delete p[key]; }
+    else if (time / duration >= COMPLETED_THRESHOLD) { p[key] = { completed: true, time: 0, duration }; }
+    else { p[key] = { time, duration, completed: false }; }
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
+}
+function getEpisodeProgress(serie, season, ep) {
+    const p = getProgress();
+    return p[`${serie}_${season}_${ep}`] || null;
+}
+
+// ============= DOM =============
 const app = document.getElementById('app');
 const backBtn = document.getElementById('backBtn');
-const langBtn = document.getElementById('langBtn');
 const homeBtn = document.getElementById('homeBtn');
+const homeLogo = document.getElementById('homeLogo');
+const langBtn = document.getElementById('langBtn');
+const langBtnText = document.getElementById('langBtnText');
 const playerContainer = document.getElementById('playerContainer');
 const video = document.getElementById('videoPlayer');
+const playerTitle = document.getElementById('playerTitle');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const playIcon = document.getElementById('playIcon');
 const pauseIcon = document.getElementById('pauseIcon');
@@ -750,383 +1327,456 @@ const timelineProgress = document.getElementById('timelineProgress');
 const timeDisplay = document.getElementById('timeDisplay');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 const downloadBtn = document.getElementById('downloadBtn');
-const episodeMeta = document.getElementById('episodeMeta');
-const nextEpisodeOverlay = document.getElementById('nextEpisodeOverlay');
-const nextEpisodeBtn = document.getElementById('nextEpisodeBtn');
-const exitPlayerBtn = document.getElementById('exitPlayerBtn');
+const exitBtn = document.getElementById('exitBtn');
 const langSelectorBtn = document.getElementById('langSelectorBtn');
-const langSelectorOverlay = document.getElementById('langSelectorOverlay');
-const langOptions = document.getElementById('langOptions');
+const langOverlay = document.getElementById('langOverlay');
+const langOptionsList = document.getElementById('langOptionsList');
 const closeLangBtn = document.getElementById('closeLangBtn');
+const nextOverlay = document.getElementById('nextOverlay');
+const nextEpisodeBtn = document.getElementById('nextEpisodeBtn');
+const closeNextBtn = document.getElementById('closeNextBtn');
+const resumeOverlay = document.getElementById('resumeOverlay');
+const resumeBtn = document.getElementById('resumeBtn');
+const restartBtn = document.getElementById('restartBtn');
+const resumeTitle = document.getElementById('resumeTitle');
+const resumeTime = document.getElementById('resumeTime');
 
-// ============= INITIALIZATION =============
+// ============= INIT =============
 function init() {
-    // Charger les données
-    setTimeout(() => {
-        data = videos;
-        renderView();
-    }, 500);
-    
-    // Event listeners
+    setTimeout(() => render(), 300);
+
     backBtn.addEventListener('click', goBack);
     homeBtn.addEventListener('click', goHome);
-    langBtn.addEventListener('click', toggleLanguage);
+    homeLogo.addEventListener('click', goHome);
+    langBtn.addEventListener('click', toggleLang);
+
     playPauseBtn.addEventListener('click', togglePlay);
     muteBtn.addEventListener('click', toggleMute);
-    volumeSlider.addEventListener('input', handleVolumeChange);
-    timeline.addEventListener('click', handleSeek);
+    volumeSlider.addEventListener('input', e => {
+        video.volume = e.target.value;
+        video.muted = e.target.value == 0;
+        updateMuteIcon();
+    });
+    timeline.addEventListener('click', seek);
     fullscreenBtn.addEventListener('click', toggleFullscreen);
-    nextEpisodeBtn.addEventListener('click', playNextEpisode);
-    exitPlayerBtn.addEventListener('click', exitPlayer);
+    exitBtn.addEventListener('click', exitPlayer);
+
     langSelectorBtn.addEventListener('click', openLangSelector);
-    closeLangBtn.addEventListener('click', closeLangSelector);
-    
+    closeLangBtn.addEventListener('click', () => langOverlay.classList.add('hidden'));
+    nextEpisodeBtn.addEventListener('click', playNext);
+    closeNextBtn.addEventListener('click', () => nextOverlay.classList.add('hidden'));
+    resumeBtn.addEventListener('click', confirmResume);
+    restartBtn.addEventListener('click', restartFromZero);
+
     video.addEventListener('click', togglePlay);
     video.addEventListener('timeupdate', updateTimeline);
     video.addEventListener('loadedmetadata', updateDuration);
-    video.addEventListener('ended', handleVideoEnd);
-    video.addEventListener('play', () => updatePlayButton(true));
-    video.addEventListener('pause', () => updatePlayButton(false));
-    
-    // Keyboard controls
-    document.addEventListener('keydown', handleKeyboard);
+    video.addEventListener('ended', handleEnd);
+    video.addEventListener('play', () => updatePlayIcon(true));
+    video.addEventListener('pause', () => updatePlayIcon(false));
+
+    // Save progress periodically
+    setInterval(() => {
+        if (view === 'player' && !video.paused && video.duration) {
+            saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
+        }
+    }, 5000);
+    window.addEventListener('beforeunload', () => {
+        if (view === 'player' && video.duration) {
+            saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
+        }
+    });
+
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('mousemove', resetControlsTimer);
+    document.addEventListener('touchstart', resetControlsTimer);
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    }
 }
 
-// ============= NAVIGATION =============
-function renderView() {
-    if (currentView === 'series') renderSeries();
-    else if (currentView === 'seasons') renderSeasons();
-    else if (currentView === 'episodes') renderEpisodes();
-    else if (currentView === 'player') showPlayer();
-    
-    updateNavButtons();
+// ============= RENDER =============
+function render() {
+    if (view === 'series') renderSeries();
+    else if (view === 'seasons') renderSeasons();
+    else if (view === 'episodes') renderEpisodes();
+    updateNav();
 }
 
 function renderSeries() {
-    app.innerHTML = `
-        <div class="container">
-            <h2 class="page-title">Séries disponibles</h2>
-            <div class="grid-series">
-                ${Object.entries(data).map(([key, serie]) => `
-                    <div class="card-serie" onclick="selectSerie('${key}')">
-                        <img src="${Object.values(serie.saisons)[0].background}" alt="${serie.name}">
-                        <div class="card-overlay">
-                            <h3 class="card-title">${serie.name}</h3>
-                        </div>
+    const heroSerie = videos.hazbin;
+    const heroBg = Object.values(heroSerie.saisons)[0].background;
+    const heroMeta = SERIES_META.hazbin;
+
+    const cards = Object.entries(videos).map(([key, serie], i) => {
+        const meta = SERIES_META[key] || { name: serie.name, tagline: '', logo: '' };
+        const bg = Object.values(serie.saisons)[0].background;
+        const seasonCount = Object.keys(serie.saisons).length;
+        const episodeCount = Object.values(serie.saisons).reduce((n, s) => n + Object.keys(s.episodes).length, 0);
+        return `
+            <div class="serie-card" onclick="selectSerie('${key}')" style="animation: fadeInUp 0.6s ${i * 0.1}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
+                <div class="serie-card-bg"><img src="${bg}" alt="${meta.name}" loading="lazy"></div>
+                <div class="serie-card-overlay">
+                    <div class="serie-logo-wrap">
+                        <img src="${meta.logo}" alt="${meta.name}" onerror="this.outerHTML='<h3 style=&quot;font-family:var(--display);font-size:2.25rem;font-weight:600;font-style:italic;letter-spacing:-0.02em;color:#fff&quot;>${meta.name}</h3>'">
                     </div>
-                `).join('')}
+                    <div class="serie-meta">
+                        <span class="serie-tag">${seasonCount} saison${seasonCount > 1 ? 's' : ''}</span>
+                        <span class="serie-tag">${episodeCount} épisodes</span>
+                        <span class="serie-cta">
+                            Regarder
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </span>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+
+    app.innerHTML = `
+        <section class="hero">
+            <div class="hero-bg"><img src="${heroBg}" alt=""></div>
+            <div class="hero-content">
+                <div class="hero-eyebrow">VoxFlix · Streaming</div>
+                <h1 class="hero-title">Bienvenue dans <em>l'enfer</em>.</h1>
+                <p class="hero-sub">L'intégrale de Hazbin Hotel et Helluva Boss. Sans pub, sans compte, juste le show — en VF et VOSTFR quand c'est dispo.</p>
             </div>
-        </div>
-    `;
+        </section>
+        <section class="section">
+            <div class="section-head">
+                <h2 class="section-title">Les <em>séries</em></h2>
+                <span class="section-meta">${Object.keys(videos).length} disponibles</span>
+            </div>
+            <div class="series-grid">${cards}</div>
+        </section>`;
 }
 
 function renderSeasons() {
-    const serie = data[currentSerie];
-    app.innerHTML = `
-        <div class="container">
-            <h2 class="page-title">${serie.name}</h2>
-            <div class="grid-seasons">
-                ${Object.entries(serie.saisons).map(([seasonNum, season]) => `
-                    <div class="card-season" onclick="selectSeason('${seasonNum}')">
-                        <img src="${season.background}" alt="Saison ${seasonNum}" style="width:100%;height:100%;object-fit:cover;">
-                        <div class="card-overlay">
-                            <h3 class="card-title">Saison ${seasonNum}</h3>
+    const serie = videos[currentSerie];
+    const meta = SERIES_META[currentSerie] || {};
+    const seasons = Object.entries(serie.saisons).map(([num, s], i) => {
+        const epCount = Object.keys(s.episodes).length;
+        const watchedCount = Object.keys(s.episodes).filter(ep => {
+            const p = getEpisodeProgress(currentSerie, num, ep);
+            return p && p.completed;
+        }).length;
+        return `
+            <div class="season-card" onclick="selectSeason('${num}')" style="animation: fadeInUp 0.5s ${i * 0.08}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
+                <div class="season-card-bg"><img src="${s.background}" alt="Saison ${num}" loading="lazy"></div>
+                <div class="season-card-content">
+                    <div></div>
+                    <div>
+                        <div class="season-num">
+                            <small>${num === '0' ? 'Pilote' : 'Saison'}</small>
+                            ${num === '0' ? '00' : String(num).padStart(2, '0')}
+                        </div>
+                        <div class="season-info" style="margin-top:1rem">
+                            <span class="season-info-text"><strong>${epCount}</strong> ${epCount > 1 ? 'épisodes' : 'épisode'}</span>
+                            ${watchedCount > 0 ? `<span class="season-info-text">${watchedCount}/${epCount} vu${watchedCount > 1 ? 's' : ''}</span>` : ''}
                         </div>
                     </div>
-                `).join('')}
+                </div>
+            </div>`;
+    }).join('');
+
+    app.innerHTML = `
+        <section class="section" style="padding-top:2rem">
+            <div style="margin-bottom:2rem;animation:fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)">
+                <div class="hero-eyebrow" style="margin-bottom:0.75rem">${meta.tagline || ''}</div>
+                <h2 style="font-family:var(--display);font-size:clamp(2rem,5vw,3rem);font-weight:400;letter-spacing:-0.03em;line-height:1">
+                    ${serie.name}
+                </h2>
             </div>
-        </div>
-    `;
+            <div class="section-head">
+                <h3 class="section-title"><em>Saisons</em></h3>
+                <span class="section-meta">${Object.keys(serie.saisons).length} dispo.</span>
+            </div>
+            <div class="seasons-grid">${seasons}</div>
+        </section>`;
 }
 
 function renderEpisodes() {
-    const serie = data[currentSerie];
+    const serie = videos[currentSerie];
     const season = serie.saisons[currentSeason];
+    const eps = Object.entries(season.episodes).map(([num, ep], i) => {
+        const hasVF = ep.VF && ep.VF !== '';
+        const hasVOSTFR = ep.VOSTFR && ep.VOSTFR !== '';
+        const url = ep.VF || ep.VOSTFR || '';
+        const progress = getEpisodeProgress(currentSerie, currentSeason, num);
+        const watched = progress && progress.completed;
+        const partial = progress && !progress.completed && progress.time > 0;
+        const progressPct = partial ? (progress.time / progress.duration) * 100 : 0;
+        return `
+            <div class="episode-row ${watched ? 'watched' : ''}" onclick="play('${num}')" style="animation: fadeInUp 0.4s ${i * 0.04}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
+                <div class="episode-num">${String(num).padStart(2, '0')}</div>
+                <div class="episode-thumb">
+                    ${url ? `<video src="${url}#t=30" preload="metadata" muted></video>` : '<div class="episode-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>'}
+                    <div class="episode-play-overlay">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+                <div class="episode-info">
+                    <div class="episode-title">${ep.title || `Épisode ${num}`}</div>
+                    <div class="episode-tags">
+                        ${hasVF ? '<span class="lang-pill">VF</span>' : ''}
+                        ${hasVOSTFR ? '<span class="lang-pill vostfr">VOSTFR</span>' : ''}
+                        ${watched ? '<span class="lang-pill" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border-color:var(--border)">✓ Vu</span>' : ''}
+                        ${partial ? `<span class="lang-pill" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border-color:var(--border)">${Math.round(progressPct)}%</span>` : ''}
+                    </div>
+                </div>
+                <div class="episode-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+                ${partial ? `<div class="episode-progress-bar" style="width:${progressPct}%"></div>` : ''}
+            </div>`;
+    }).join('');
+
     app.innerHTML = `
-        <div class="container">
-            <h2 class="page-title">${serie.name} - Saison ${currentSeason}</h2>
-            <div class="grid-episodes">
-                ${Object.entries(season.episodes).map(([epNum, episode]) => {
-                    const hasVF = episode.VF && episode.VF !== '';
-                    const hasVOSTFR = episode.VOSTFR && episode.VOSTFR !== '';
-                    const videoUrl = episode.VF || episode.VOSTFR || '';
-                    
-                    return `
-                        <div class="card-episode" onclick="playEpisode('${epNum}')">
-                            <div class="episode-thumb">
-                                ${videoUrl ? `
-                                    <video src="${videoUrl}#t=30" preload="metadata" muted class="episode-thumbnail-video"></video>
-                                    <div class="episode-thumb-overlay"></div>
-                                ` : ''}
-                                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M8 5v14l11-7z"/>
-                                </svg>
-                                <div class="episode-number">EP ${epNum}</div>
-                            </div>
-                            <div class="episode-info">
-                                <div class="episode-title">${episode.title || 'Épisode ' + epNum}</div>
-                                <div class="episode-langs">
-                                    ${hasVF ? '<span class="lang-badge lang-vf">VF</span>' : ''}
-                                    ${hasVOSTFR ? '<span class="lang-badge lang-vostfr">VOSTFR</span>' : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+        <section class="section" style="padding-top:2rem">
+            <div style="margin-bottom:2rem;animation:fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)">
+                <div class="hero-eyebrow" style="margin-bottom:0.5rem">${serie.name}</div>
+                <h2 style="font-family:var(--display);font-size:clamp(1.75rem,4.5vw,2.5rem);font-weight:400;font-style:italic;letter-spacing:-0.02em">
+                    ${currentSeason === '0' ? 'Pilote' : `Saison ${String(currentSeason).padStart(2, '0')}`}
+                </h2>
             </div>
-        </div>
-    `;
+            <div class="episodes-list">${eps}</div>
+        </section>`;
 }
 
-function selectSerie(key) {
-    currentSerie = key;
-    currentView = 'seasons';
-    renderView();
-}
+// ============= NAV =============
+window.selectSerie = key => { currentSerie = key; view = 'seasons'; render(); window.scrollTo(0,0); };
+window.selectSeason = num => { currentSeason = num; view = 'episodes'; render(); window.scrollTo(0,0); };
 
-function selectSeason(num) {
-    currentSeason = num;
-    currentView = 'episodes';
-    renderView();
-}
-
-function playEpisode(epNum) {
+window.play = epNum => {
     currentEpisode = epNum;
-    const episode = data[currentSerie].saisons[currentSeason].episodes[epNum];
-    
-    let videoUrl = episode[currentLanguage];
-    if (!videoUrl || videoUrl === '') {
-        videoUrl = episode.VF || episode.VOSTFR;
+    const ep = videos[currentSerie].saisons[currentSeason].episodes[epNum];
+    let url = ep[lang];
+    if (!url) url = ep.VF || ep.VOSTFR;
+    if (!url) { alert('Aucune version disponible'); return; }
+
+    // Check resume
+    const progress = getEpisodeProgress(currentSerie, currentSeason, epNum);
+    if (progress && !progress.completed && progress.time >= RESUME_THRESHOLD) {
+        pendingResume = { url, time: progress.time };
+        resumeTitle.textContent = ep.title || `Épisode ${epNum}`;
+        resumeTime.textContent = formatTime(progress.time);
+        view = 'player';
+        showPlayer();
+        video.src = url;
+        downloadBtn.href = url;
+        playerTitle.textContent = `${videos[currentSerie].name} · S${currentSeason}E${epNum} · ${ep.title || ''}`;
+        resumeOverlay.classList.remove('hidden');
+        updateNav();
+    } else {
+        startPlayback(url, 0, ep);
     }
-    
-    if (!videoUrl || videoUrl === '') {
-        alert('Aucune version disponible');
-        return;
+};
+
+function startPlayback(url, time, ep) {
+    video.src = url;
+    downloadBtn.href = url;
+    playerTitle.textContent = `${videos[currentSerie].name} · S${currentSeason}E${currentEpisode} · ${ep.title || ''}`;
+    view = 'player';
+    showPlayer();
+    if (time > 0) {
+        video.addEventListener('loadedmetadata', () => { video.currentTime = time; }, { once: true });
     }
-    
-    video.src = videoUrl;
-    downloadBtn.href = videoUrl;
-    episodeMeta.textContent = `${data[currentSerie].name} - S${currentSeason}E${epNum} - ${episode.title || ''}`;
-    
-    currentView = 'player';
-    renderView();
-    video.play();
+    video.play().catch(() => {});
+    updateNav();
 }
 
-function playNextEpisode() {
-    const episodes = data[currentSerie].saisons[currentSeason].episodes;
-    const nextEp = String(parseInt(currentEpisode) + 1);
-    if (episodes[nextEp]) {
-        playEpisode(nextEp);
-        nextEpisodeOverlay.classList.add('hidden');
-    }
+function confirmResume() {
+    if (!pendingResume) return;
+    video.addEventListener('loadedmetadata', () => { video.currentTime = pendingResume.time; }, { once: true });
+    video.play().catch(() => {});
+    resumeOverlay.classList.add('hidden');
+    pendingResume = null;
+}
+function restartFromZero() {
+    video.currentTime = 0;
+    video.play().catch(() => {});
+    resumeOverlay.classList.add('hidden');
+    pendingResume = null;
 }
 
 function showPlayer() {
-    app.style.display = 'none';
+    document.body.style.overflow = 'hidden';
     playerContainer.classList.remove('hidden');
+    resetControlsTimer();
 }
-
 function hidePlayer() {
-    app.style.display = 'block';
+    document.body.style.overflow = '';
     playerContainer.classList.add('hidden');
-    langSelectorOverlay.classList.add('hidden');
-    nextEpisodeOverlay.classList.add('hidden');
+    nextOverlay.classList.add('hidden');
+    langOverlay.classList.add('hidden');
+    resumeOverlay.classList.add('hidden');
+    if (video.duration) saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
     video.pause();
-    video.src = '';
+    video.removeAttribute('src');
+    video.load();
 }
 
-function exitPlayer() {
-    hidePlayer();
-    currentView = 'episodes';
-    renderView();
-}
-
+function exitPlayer() { hidePlayer(); view = 'episodes'; render(); }
 function goBack() {
-    if (currentView === 'player') {
-        exitPlayer();
-    } else if (currentView === 'episodes') {
-        currentView = 'seasons';
-    } else if (currentView === 'seasons') {
-        currentView = 'series';
-    }
-    renderView();
+    if (view === 'player') exitPlayer();
+    else if (view === 'episodes') { view = 'seasons'; render(); }
+    else if (view === 'seasons') { view = 'series'; render(); }
 }
-
 function goHome() {
-    if (currentView === 'player') hidePlayer();
-    currentView = 'series';
-    currentSerie = null;
-    currentSeason = null;
-    currentEpisode = null;
-    renderView();
+    if (view === 'player') hidePlayer();
+    view = 'series';
+    currentSerie = currentSeason = currentEpisode = null;
+    render();
 }
 
-function updateNavButtons() {
-    backBtn.classList.toggle('hidden', currentView === 'series');
-    langBtn.classList.toggle('hidden', currentView !== 'player' || currentSerie !== 'hazbin');
-    langBtn.textContent = currentLanguage;
-    
-    // Afficher le bouton de sélection de langue seulement pour Hazbin Hotel
-    if (langSelectorBtn && currentView === 'player' && currentSerie === 'hazbin') {
-        langSelectorBtn.style.display = 'flex';
-    } else if (langSelectorBtn) {
-        langSelectorBtn.style.display = 'none';
-    }
+function updateNav() {
+    backBtn.classList.toggle('hidden', view === 'series');
+    const showLang = view === 'player' && currentSerie === 'hazbin';
+    langBtn.classList.toggle('hidden', !showLang);
+    langBtnText.textContent = lang;
+    langSelectorBtn.style.display = showLang ? 'flex' : 'none';
 }
 
 // ============= PLAYER CONTROLS =============
 function togglePlay() {
-    if (video.paused) video.play();
+    if (video.paused) video.play().catch(() => {});
     else video.pause();
 }
-
-function updatePlayButton(isPlaying) {
-    playIcon.classList.toggle('hidden', isPlaying);
-    pauseIcon.classList.toggle('hidden', !isPlaying);
+function updatePlayIcon(playing) {
+    playIcon.classList.toggle('hidden', playing);
+    pauseIcon.classList.toggle('hidden', !playing);
 }
-
 function toggleMute() {
     video.muted = !video.muted;
-    volumeIcon.classList.toggle('hidden', video.muted);
-    mutedIcon.classList.toggle('hidden', !video.muted);
+    updateMuteIcon();
 }
-
-function handleVolumeChange(e) {
-    video.volume = e.target.value;
-    video.muted = e.target.value == 0;
-    volumeIcon.classList.toggle('hidden', video.muted);
-    mutedIcon.classList.toggle('hidden', !video.muted);
+function updateMuteIcon() {
+    volumeIcon.classList.toggle('hidden', video.muted || video.volume === 0);
+    mutedIcon.classList.toggle('hidden', !(video.muted || video.volume === 0));
 }
-
-function handleSeek(e) {
+function seek(e) {
     const rect = timeline.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    video.currentTime = pos * video.duration;
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    if (video.duration) video.currentTime = pct * video.duration;
 }
-
 function updateTimeline() {
-    if (video.duration) {
-        const percent = (video.currentTime / video.duration) * 100;
-        timelineProgress.style.width = percent + '%';
-        timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-    }
+    if (!video.duration) return;
+    const pct = (video.currentTime / video.duration) * 100;
+    timelineProgress.style.width = pct + '%';
+    timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
 }
-
 function updateDuration() {
     timeDisplay.textContent = '0:00 / ' + formatTime(video.duration);
 }
-
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
-        video.requestFullscreen().catch(err => console.log(err));
+        (playerContainer.requestFullscreen ? playerContainer.requestFullscreen() : video.requestFullscreen()).catch(() => {});
     } else {
         document.exitFullscreen();
     }
 }
-
-function handleVideoEnd() {
-    const episodes = data[currentSerie].saisons[currentSeason].episodes;
-    const nextEp = String(parseInt(currentEpisode) + 1);
-    if (episodes[nextEp]) {
-        nextEpisodeOverlay.classList.remove('hidden');
-    }
+function handleEnd() {
+    if (video.duration) saveProgress(currentSerie, currentSeason, currentEpisode, video.duration, video.duration);
+    const eps = videos[currentSerie].saisons[currentSeason].episodes;
+    const next = String(parseInt(currentEpisode) + 1);
+    if (eps[next]) nextOverlay.classList.remove('hidden');
+}
+function playNext() {
+    nextOverlay.classList.add('hidden');
+    const next = String(parseInt(currentEpisode) + 1);
+    if (videos[currentSerie].saisons[currentSeason].episodes[next]) play(next);
 }
 
-function toggleLanguage() {
-    currentLanguage = currentLanguage === 'VF' ? 'VOSTFR' : 'VF';
-    localStorage.setItem('voxflix_lang', currentLanguage);
-    langBtn.textContent = currentLanguage;
-    
-    const currentTime = video.currentTime;
-    playEpisode(currentEpisode);
-    video.currentTime = currentTime;
+function toggleLang() {
+    const newLang = lang === 'VF' ? 'VOSTFR' : 'VF';
+    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
+    if (!ep[newLang]) return;
+    lang = newLang;
+    localStorage.setItem('voxflix_lang', lang);
+    langBtnText.textContent = lang;
+    const t = video.currentTime;
+    const wasPlaying = !video.paused;
+    video.src = ep[lang];
+    downloadBtn.href = ep[lang];
+    video.addEventListener('loadedmetadata', () => {
+        video.currentTime = t;
+        if (wasPlaying) video.play().catch(() => {});
+    }, { once: true });
 }
 
 function openLangSelector() {
-    const episode = data[currentSerie].saisons[currentSeason].episodes[currentEpisode];
-    const hasVF = episode.VF && episode.VF !== '';
-    const hasVOSTFR = episode.VOSTFR && episode.VOSTFR !== '';
-    
-    langOptions.innerHTML = `
-        <div class="lang-option ${currentLanguage === 'VF' ? 'active' : ''} ${!hasVF ? 'disabled' : ''}" 
-             ${hasVF ? 'onclick="selectLanguage(\'VF\')"' : ''}>
-            <span style="font-weight: 600;">Version Française (VF)</span>
+    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
+    const hasVF = ep.VF && ep.VF !== '';
+    const hasVOSTFR = ep.VOSTFR && ep.VOSTFR !== '';
+    langOptionsList.innerHTML = `
+        <div class="lang-option ${lang === 'VF' ? 'active' : ''} ${!hasVF ? 'disabled' : ''}" ${hasVF ? 'onclick="selectLang(\'VF\')"' : ''}>
             <div>
-                ${currentLanguage === 'VF' ? '<span style="color: var(--neon-cyan); font-size: 1.5rem;">✓</span>' : ''}
-                ${!hasVF ? '<span style="font-size: 0.75rem; opacity: 0.5;">Non disponible</span>' : ''}
+                <div class="lang-option-label">Version Française</div>
+                <div class="lang-option-sub">${hasVF ? 'VF' : 'Non disponible'}</div>
             </div>
+            ${lang === 'VF' && hasVF ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
         </div>
-        <div class="lang-option ${currentLanguage === 'VOSTFR' ? 'active' : ''} ${!hasVOSTFR ? 'disabled' : ''}" 
-             ${hasVOSTFR ? 'onclick="selectLanguage(\'VOSTFR\')"' : ''}>
-            <span style="font-weight: 600;">Version Originale Sous-titrée (VOSTFR)</span>
+        <div class="lang-option ${lang === 'VOSTFR' ? 'active' : ''} ${!hasVOSTFR ? 'disabled' : ''}" ${hasVOSTFR ? 'onclick="selectLang(\'VOSTFR\')"' : ''}>
             <div>
-                ${currentLanguage === 'VOSTFR' ? '<span style="color: var(--neon-cyan); font-size: 1.5rem;">✓</span>' : ''}
-                ${!hasVOSTFR ? '<span style="font-size: 0.75rem; opacity: 0.5;">Non disponible</span>' : ''}
+                <div class="lang-option-label">Version Originale Sous-titrée</div>
+                <div class="lang-option-sub">${hasVOSTFR ? 'VOSTFR' : 'Non disponible'}</div>
             </div>
-        </div>
-    `;
-    
-    langSelectorOverlay.classList.remove('hidden');
+            ${lang === 'VOSTFR' && hasVOSTFR ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+        </div>`;
+    langOverlay.classList.remove('hidden');
 }
 
-function closeLangSelector() {
-    langSelectorOverlay.classList.add('hidden');
-}
-
-function selectLanguage(lang) {
-    if (currentLanguage === lang) {
-        closeLangSelector();
-        return;
-    }
-    
-    const episode = data[currentSerie].saisons[currentSeason].episodes[currentEpisode];
-    if (!episode[lang] || episode[lang] === '') {
-        return;
-    }
-    
-    currentLanguage = lang;
-    localStorage.setItem('voxflix_lang', currentLanguage);
-    langBtn.textContent = currentLanguage;
-    
-    const currentTime = video.currentTime;
+window.selectLang = newLang => {
+    if (lang === newLang) { langOverlay.classList.add('hidden'); return; }
+    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
+    if (!ep[newLang]) return;
+    lang = newLang;
+    localStorage.setItem('voxflix_lang', lang);
+    langBtnText.textContent = lang;
+    const t = video.currentTime;
     const wasPlaying = !video.paused;
-    
-    video.src = episode[lang];
-    downloadBtn.href = episode[lang];
-    
-    video.addEventListener('loadedmetadata', function onLoaded() {
-        video.currentTime = currentTime;
-        if (wasPlaying) video.play();
-        video.removeEventListener('loadedmetadata', onLoaded);
-    });
-    
-    closeLangSelector();
+    video.src = ep[newLang];
+    downloadBtn.href = ep[newLang];
+    video.addEventListener('loadedmetadata', () => {
+        video.currentTime = t;
+        if (wasPlaying) video.play().catch(() => {});
+    }, { once: true });
+    langOverlay.classList.add('hidden');
+};
+
+function formatTime(s) {
+    if (isNaN(s) || !isFinite(s)) return '0:00';
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = Math.floor(s % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
-function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return mins + ':' + (secs < 10 ? '0' : '') + secs;
+function handleKey(e) {
+    if (view !== 'player') return;
+    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+    else if (e.code === 'ArrowRight') { e.preventDefault(); video.currentTime = Math.min((video.duration||0), video.currentTime + 10); }
+    else if (e.code === 'ArrowLeft') { e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 10); }
+    else if (e.code === 'KeyM') { e.preventDefault(); toggleMute(); }
+    else if (e.code === 'KeyF') { e.preventDefault(); toggleFullscreen(); }
+    else if (e.code === 'Escape') { if (!document.fullscreenElement) exitPlayer(); }
 }
 
-function handleKeyboard(e) {
-    if (currentView !== 'player') return;
-    if (e.code === 'Space') {
-        e.preventDefault();
-        togglePlay();
-    } else if (e.code === 'ArrowRight') {
-        e.preventDefault();
-        video.currentTime += 10;
-    } else if (e.code === 'ArrowLeft') {
-        e.preventDefault();
-        video.currentTime -= 10;
-    }
+function resetControlsTimer() {
+    if (view !== 'player') return;
+    playerContainer.classList.remove('hide-controls');
+    clearTimeout(controlsTimer);
+    controlsTimer = setTimeout(() => {
+        if (!video.paused && !langOverlay.matches(':not(.hidden)') && !nextOverlay.matches(':not(.hidden)') && !resumeOverlay.matches(':not(.hidden)')) {
+            playerContainer.classList.add('hide-controls');
+        }
+    }, 3000);
 }
 
-// ============= START =============
+// GO
 init();
-    </script>
+</script>
 </body>
 </html>
