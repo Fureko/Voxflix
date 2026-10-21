@@ -1,1782 +1,787 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0a0a0f">
-<title>VoxFlix — Streaming</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>VoxFlix Helluva Boss</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Rubik+Glitch&family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-:root {
-    --bg: #07080d;
-    --bg-elev: #0f1119;
-    --bg-card: #14172310;
-    --surface: rgba(255,255,255,0.04);
-    --surface-hover: rgba(255,255,255,0.08);
-    --border: rgba(255,255,255,0.08);
-    --border-strong: rgba(255,255,255,0.16);
-    --text: #f5f5f7;
-    --text-dim: #a8a8b3;
-    --text-muted: #6b6b78;
-    --accent: #44ffff;
-    --accent-glow: rgba(68,255,255,0.35);
-    --accent-soft: rgba(68,255,255,0.12);
-    --hazbin: #ff2d6f;
-    --helluva: #e63946;
-    --display: 'Fraunces', 'Times New Roman', serif;
-    --body: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--body);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    min-height: 100vh;
-    min-height: 100dvh;
-}
-
-body {
-    background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(68,255,255,0.08), transparent 60%),
-        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,45,111,0.04), transparent 60%);
-    background-attachment: fixed;
-}
-
-/* Subtle film grain */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.4;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-button, a { font-family: inherit; color: inherit; }
-img { display: block; max-width: 100%; }
-
-/* ============= HEADER ============= */
-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    padding: calc(0.9rem + var(--safe-top)) 1.5rem 0.9rem;
-    background: linear-gradient(to bottom, rgba(7,8,13,0.95), rgba(7,8,13,0.6));
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-}
-
-.logo {
-    font-family: var(--display);
-    font-weight: 600;
-    font-style: italic;
-    font-size: 1.5rem;
-    letter-spacing: -0.02em;
-    cursor: pointer;
-    background: linear-gradient(135deg, #fff 0%, #fff 40%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.logo:hover { transform: scale(1.04); }
-
-.logo .dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    margin-left: 4px;
-    box-shadow: 0 0 12px var(--accent-glow);
-    vertical-align: middle;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.icon-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.25s ease;
-    flex-shrink: 0;
-}
-
-.icon-btn:hover, .icon-btn:active {
-    background: var(--surface-hover);
-    border-color: var(--border-strong);
-    transform: translateY(-1px);
-}
-
-.icon-btn svg { width: 18px; height: 18px; }
-
-.btn-back {
-    border-radius: 999px;
-    padding: 0 1rem;
-    height: 40px;
-    width: auto;
-    gap: 0.4rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.btn-back svg { width: 16px; height: 16px; }
-
-.hidden { display: none !important; }
-
-/* ============= MAIN ============= */
-main {
-    position: relative;
-    z-index: 2;
-    padding-bottom: calc(3rem + var(--safe-bottom));
-}
-
-/* ============= HERO (series view) ============= */
-.hero {
-    position: relative;
-    min-height: 70vh;
-    display: flex;
-    align-items: flex-end;
-    padding: 6rem 1.5rem 2rem;
-    overflow: hidden;
-}
-
-.hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-}
-
-.hero-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scale(1.1);
-    filter: saturate(1.1) brightness(0.7);
-    animation: heroZoom 20s ease-in-out infinite alternate;
-}
-
-@keyframes heroZoom {
-    from { transform: scale(1.1) translateX(0); }
-    to { transform: scale(1.18) translateX(-2%); }
-}
-
-.hero-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(to top, var(--bg) 0%, rgba(7,8,13,0.7) 30%, transparent 70%),
-        linear-gradient(to right, rgba(7,8,13,0.85) 0%, rgba(7,8,13,0.4) 50%, transparent 100%);
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 720px;
-    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    margin-bottom: 1rem;
-    font-weight: 500;
-}
-
-.hero-eyebrow::before {
-    content: '';
-    width: 24px;
-    height: 1px;
-    background: var(--accent);
-}
-
-.hero-title {
-    font-family: var(--display);
-    font-weight: 400;
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    margin-bottom: 1rem;
-}
-
-.hero-title em {
-    font-style: italic;
-    font-weight: 300;
-    color: var(--accent);
-}
-
-.hero-sub {
-    color: var(--text-dim);
-    font-size: clamp(0.95rem, 2vw, 1.05rem);
-    line-height: 1.6;
-    max-width: 540px;
-}
-
-/* ============= SECTION ============= */
-.section {
-    padding: 3rem 1.5rem 1rem;
-    max-width: 1600px;
-    margin: 0 auto;
-}
-
-.section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
-}
-
-.section-title {
-    font-family: var(--display);
-    font-weight: 500;
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    letter-spacing: -0.02em;
-}
-
-.section-title em {
-    font-style: italic;
-    font-weight: 400;
-    color: var(--text-dim);
-}
-
-.section-meta {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-}
-
-/* ============= SERIES CARDS ============= */
-.series-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-    gap: 1.25rem;
-}
-
-.serie-card {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    border-radius: 18px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--bg-elev);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.3s ease,
-                box-shadow 0.4s ease;
-    will-change: transform;
-}
-
-.serie-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-strong);
-    box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6);
-}
-
-.serie-card-bg {
-    position: absolute;
-    inset: 0;
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.serie-card-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: saturate(1.1) brightness(0.85);
-}
-
-.serie-card:hover .serie-card-bg { transform: scale(1.06); }
-
-.serie-card-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 1.75rem;
-}
-
-.serie-logo-wrap {
-    height: 90px;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: flex-end;
-    filter: drop-shadow(0 4px 20px rgba(0,0,0,0.5));
-}
-
-.serie-logo-wrap img {
-    max-height: 100%;
-    max-width: 70%;
-    object-fit: contain;
-    object-position: left bottom;
-}
-
-.serie-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.serie-tag {
-    font-size: 0.7rem;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 500;
-    color: var(--text);
-}
-
-.serie-tag.accent { background: var(--accent); color: #000; }
-
-.serie-cta {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    color: var(--accent);
-    font-weight: 500;
-    transition: transform 0.3s ease;
-}
-
-.serie-card:hover .serie-cta { transform: translateX(4px); }
-
-/* ============= SEASONS ============= */
-.seasons-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-    gap: 1rem;
-}
-
-.season-card {
-    position: relative;
-    aspect-ratio: 3 / 4;
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.season-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent-soft);
-    box-shadow: 0 20px 50px -10px rgba(68,255,255,0.15);
-}
-
-.season-card-bg {
-    position: absolute;
-    inset: 0;
-    transition: transform 0.6s ease;
-}
-
-.season-card:hover .season-card-bg { transform: scale(1.08); }
-
-.season-card-bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: saturate(1.1) brightness(0.7);
-}
-
-.season-card-content {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.2) 50%, transparent);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.season-num {
-    font-family: var(--display);
-    font-weight: 300;
-    font-style: italic;
-    font-size: 4.5rem;
-    line-height: 1;
-    color: rgba(255,255,255,0.95);
-    letter-spacing: -0.05em;
-}
-
-.season-num small {
-    display: block;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    font-style: normal;
-    font-family: var(--body);
-    color: var(--text-dim);
-    margin-bottom: 0.4rem;
-    font-weight: 500;
-}
-
-.season-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-
-.season-info-text {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-}
-
-.season-info-text strong {
-    color: var(--text);
-    font-weight: 600;
-}
-
-/* ============= EPISODES ============= */
-.episodes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.episode-row {
-    display: grid;
-    grid-template-columns: auto 200px 1fr auto;
-    gap: 1.25rem;
-    align-items: center;
-    padding: 0.875rem;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.episode-row:hover {
-    border-color: var(--border-strong);
-    background: var(--surface-hover);
-    transform: translateX(4px);
-}
-
-.episode-row.watched {
-    opacity: 0.65;
-}
-
-.episode-progress-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow);
-    transition: width 0.3s;
-}
-
-.episode-num {
-    font-family: var(--display);
-    font-weight: 300;
-    font-style: italic;
-    font-size: 2rem;
-    color: var(--text-muted);
-    line-height: 1;
-    width: 2.5rem;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.episode-row:hover .episode-num { color: var(--accent); }
-
-.episode-thumb {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--bg-elev);
-    flex-shrink: 0;
-}
-
-.episode-thumb video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.8;
-    transition: opacity 0.3s, transform 0.6s ease;
-}
-
-.episode-row:hover .episode-thumb video {
-    opacity: 1;
-    transform: scale(1.06);
-}
-
-.episode-thumb-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(68,255,255,0.1), rgba(255,45,111,0.05));
-    color: var(--text-muted);
-}
-
-.episode-play-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.episode-row:hover .episode-play-overlay { opacity: 1; }
-
-.episode-play-overlay svg {
-    width: 36px;
-    height: 36px;
-    color: var(--accent);
-    filter: drop-shadow(0 0 12px var(--accent-glow));
-}
-
-.episode-info { min-width: 0; }
-
-.episode-title {
-    font-size: 1.05rem;
-    font-weight: 500;
-    margin-bottom: 0.4rem;
-    color: var(--text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.episode-tags {
-    display: flex;
-    gap: 0.35rem;
-    align-items: center;
-}
-
-.lang-pill {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
-    background: rgba(68,255,255,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(68,255,255,0.25);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 500;
-}
-
-.lang-pill.vostfr {
-    background: rgba(255,255,255,0.05);
-    color: var(--text-dim);
-    border-color: var(--border);
-}
-
-.episode-action {
-    color: var(--text-muted);
-    transition: color 0.3s, transform 0.3s;
-}
-
-.episode-row:hover .episode-action {
-    color: var(--accent);
-    transform: translateX(2px);
-}
-
-/* ============= LOADER ============= */
-.loader-wrap {
-    min-height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.loader {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.loader-text {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    color: var(--text-muted);
-}
-
-/* ============= PLAYER ============= */
-.player {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-}
-
-.player video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-}
-
-.player-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: calc(1.25rem + var(--safe-top)) 1.5rem 4rem;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 10;
-    transition: opacity 0.4s ease;
-    gap: 1rem;
-}
-
-.player-title {
-    font-family: var(--display);
-    font-weight: 400;
-    font-style: italic;
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-    color: var(--text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-}
-
-.player-bottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 4rem 1.5rem calc(1.25rem + var(--safe-bottom));
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    z-index: 10;
-    transition: opacity 0.4s ease;
-}
-
-.player.hide-controls .player-top,
-.player.hide-controls .player-bottom { opacity: 0; pointer-events: none; }
-
-.timeline {
-    position: relative;
-    height: 14px;
-    cursor: pointer;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.timeline-track {
-    position: relative;
-    height: 4px;
-    width: 100%;
-    background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-    overflow: visible;
-    transition: height 0.2s ease;
-}
-
-.timeline:hover .timeline-track { height: 6px; }
-
-.timeline-progress {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #88ffff);
-    border-radius: 4px;
-    box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.timeline-handle {
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 0 0 12px var(--accent-glow);
-    transition: transform 0.2s ease;
-    pointer-events: none;
-}
-
-.timeline:hover .timeline-handle { transform: translate(-50%, -50%) scale(1); }
-
-.controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.controls-group {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.player-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
-}
-
-.player-btn:hover { background: rgba(255,255,255,0.1); }
-.player-btn svg { width: 22px; height: 22px; }
-
-.player-btn.primary {
-    width: 52px;
-    height: 52px;
-}
-.player-btn.primary svg { width: 28px; height: 28px; }
-
-.time-display {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-    margin-left: 0.5rem;
-    white-space: nowrap;
-}
-
-.volume-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.volume-slider {
-    width: 0;
-    overflow: hidden;
-    transition: width 0.3s ease;
-}
-
-.volume-wrap:hover .volume-slider { width: 80px; }
-
-input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
-    height: 4px;
-    width: 100%;
-}
-
-input[type="range"]::-webkit-slider-runnable-track {
-    background: rgba(255,255,255,0.25);
-    height: 4px;
-    border-radius: 2px;
-}
-input[type="range"]::-moz-range-track {
-    background: rgba(255,255,255,0.25);
-    height: 4px;
-    border-radius: 2px;
-}
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    margin-top: -5px;
-    box-shadow: 0 0 8px var(--accent-glow);
-}
-input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    border: none;
-    box-shadow: 0 0 8px var(--accent-glow);
-}
-
-/* ============= OVERLAYS ============= */
-.overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-    padding: 1.5rem;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.overlay-card {
-    background: var(--bg-elev);
-    border: 1px solid var(--border-strong);
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.overlay-eyebrow {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3em;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-}
-
-.overlay-title {
-    font-family: var(--display);
-    font-weight: 400;
-    font-style: italic;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.lang-options { display: flex; flex-direction: column; gap: 0.6rem; }
-
-.lang-option {
-    padding: 1rem 1.25rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-align: left;
-}
-
-.lang-option:hover:not(.disabled) {
-    background: var(--surface-hover);
-    border-color: var(--border-strong);
-}
-
-.lang-option.active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-}
-
-.lang-option.disabled { opacity: 0.4; cursor: not-allowed; }
-
-.lang-option-label { font-weight: 500; font-size: 0.95rem; }
-.lang-option-sub { font-size: 0.75rem; color: var(--text-muted); }
-
-.btn-cta {
-    padding: 0.85rem 2rem;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 999px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.btn-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--accent-glow); }
-
-.btn-secondary {
-    padding: 0.85rem 1.75rem;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    margin-top: 0.5rem;
-    width: 100%;
-}
-
-.btn-secondary:hover { background: var(--surface-hover); }
-
-.resume-card {
-    background: var(--bg-elev);
-    border: 1px solid var(--border-strong);
-    border-radius: 16px;
-    padding: 1.75rem;
-    max-width: 360px;
-}
-
-.resume-time {
-    color: var(--accent);
-    font-family: var(--display);
-    font-style: italic;
-    font-size: 1.25rem;
-    margin: 0.5rem 0 1.25rem;
-}
-
-.resume-actions { display: flex; flex-direction: column; gap: 0.5rem; }
-
-/* ============= RESPONSIVE ============= */
-@media (max-width: 768px) {
-    header { padding: calc(0.75rem + var(--safe-top)) 1rem 0.75rem; }
-    .logo { font-size: 1.25rem; }
-    .icon-btn { width: 38px; height: 38px; }
-    .btn-back { padding: 0 0.85rem; height: 38px; font-size: 0.8rem; }
-    
-    .hero {
-        min-height: 60vh;
-        padding: 4rem 1rem 1.5rem;
-    }
-    
-    .section { padding: 2rem 1rem 0.5rem; }
-    
-    .series-grid { grid-template-columns: 1fr; gap: 1rem; }
-    .serie-card { aspect-ratio: 16 / 11; }
-    .serie-logo-wrap { height: 70px; }
-    
-    .seasons-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-    .season-card-content { padding: 1rem; }
-    .season-num { font-size: 3rem; }
-    .season-num small { font-size: 0.6rem; letter-spacing: 0.2em; }
-    
-    .episode-row {
-        grid-template-columns: auto 120px 1fr auto;
-        gap: 0.75rem;
-        padding: 0.6rem;
-    }
-    .episode-num { font-size: 1.5rem; width: 1.75rem; }
-    .episode-title { font-size: 0.9rem; }
-    .lang-pill { font-size: 0.6rem; padding: 0.15rem 0.45rem; }
-    
-    .player-top { padding: calc(0.85rem + var(--safe-top)) 1rem 3rem; }
-    .player-bottom { padding: 3rem 1rem calc(0.85rem + var(--safe-bottom)); }
-    .player-btn { width: 40px; height: 40px; }
-    .player-btn svg { width: 20px; height: 20px; }
-    .time-display { font-size: 0.75rem; }
-    .volume-wrap { display: none; }
-}
-
-@media (max-width: 420px) {
-    .episode-row {
-        grid-template-columns: auto 90px 1fr;
-        gap: 0.6rem;
-    }
-    .episode-row .episode-action { display: none; }
-    .episode-num { font-size: 1.25rem; width: 1.5rem; }
-}
-
-@media (orientation: portrait) and (max-width: 768px) {
-    .hero { min-height: 55vh; }
-}
-
-@media (hover: none) {
-    .serie-card:hover, .season-card:hover, .episode-row:hover { transform: none; }
-    .episode-play-overlay { opacity: 0.6; }
-}
+/* Layout : chaîne de streaming infernale — hero plein cadre, rangée "Reprendre", grille par saison, lecteur en overlay */
+:root{
+  --bg:#0a0408; --surface:#170910; --surface-2:#251019; --line:#3a1626;
+  --fg:#f8ebf0; --muted:#b39aa6;
+  --red:#ff1f4b; --pink:#ff4fa3; --cyan:#38f3ff; --gold:#ffc24b;
+  --display:'Dela Gothic One',Impact,'Arial Black',sans-serif;
+  --glitch:'Rubik Glitch','Dela Gothic One',Impact,sans-serif;
+  --body:'Outfit',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.player.nosrc .big,.player.nosrc .spin{display:none}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1500px;margin:0 auto}
+
+#embers{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.14) 2px 3px);transform:translateZ(0)}
+main,header,footer{position:relative;z-index:2}
+
+/* Header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;transition:background .3s,backdrop-filter .3s}
+header.solid{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:28px;height:68px}
+.logo{font-family:var(--glitch);font-size:30px;letter-spacing:.02em;color:var(--red);position:relative;line-height:1;text-shadow:0 0 18px color-mix(in srgb,var(--red) 60%,transparent)}
+.logo::before,.logo::after{content:attr(data-t);position:absolute;inset:0;opacity:.75}
+.logo::before{color:var(--cyan);transform:translate(-2px,0);clip-path:inset(0 0 55% 0);animation:gl 3.2s infinite steps(1)}
+.logo::after{color:var(--pink);transform:translate(2px,0);clip-path:inset(55% 0 0 0);animation:gl 2.7s infinite steps(1) reverse}
+@keyframes gl{0%,92%{transform:translate(0)}93%{transform:translate(-4px,1px)}95%{transform:translate(3px,-1px)}97%{transform:translate(-1px,0)}}
+.nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:15px;transition:color .2s}
+.nav a:hover{color:var(--fg)}
+.nav .sp{flex:1}
+.live{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:8px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.sw{display:flex;gap:4px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px solid var(--line)}
+.sw button{padding:7px 14px;border-radius:999px;font-weight:700;font-size:14px;color:var(--muted);transition:background .3s,color .3s,box-shadow .3s;white-space:nowrap}
+.sw button:hover{color:var(--fg)}
+.sw button[aria-pressed="true"]{background:var(--red);color:#fff;box-shadow:0 4px 18px -4px var(--red)}
+@media (max-width:640px){.nav a.hide-sm,.live{display:none}.nav{gap:12px}.logo{font-size:22px}.sw button{padding:6px 10px;font-size:13px}}
+.hero-in.swap{animation:swapIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes swapIn{from{opacity:0;transform:translateX(-30px)}}
+.pent{transition:color .6s}
+.cm .sr{color:var(--pink)}
+.lang{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 80%,transparent)}
+.lang button{padding:6px 12px;border-radius:999px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);transition:background .25s,color .25s}
+.lang button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.sh .right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang.inplayer{background:rgba(0,0,0,.4);border-color:rgba(255,255,255,.2)}
+.lang.inplayer button{padding:5px 9px;font-size:11px}
+
+/* Hero */
+.hero{position:relative;min-height:min(78vh,720px);display:flex;align-items:flex-end;padding-block:120px 64px;margin-top:-68px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(60% 70% at 72% 40%,color-mix(in srgb,var(--red) 45%,transparent),transparent 70%),
+  radial-gradient(40% 50% at 90% 85%,color-mix(in srgb,var(--pink) 30%,transparent),transparent 70%),
+  linear-gradient(180deg,transparent 55%,var(--bg))}
+.pent{position:absolute;right:-6%;top:50%;width:min(70vw,760px);aspect-ratio:1;max-width:100%;transform:translateY(-50%);opacity:.5;animation:spin 90s linear infinite;will-change:transform}
+.pent-glow{position:absolute;right:-6%;top:50%;width:min(70vw,760px);aspect-ratio:1;max-width:100%;transform:translateY(-50%);border-radius:50%;background:radial-gradient(circle,transparent 55%,color-mix(in srgb,var(--red) 35%,transparent) 64%,transparent 72%);pointer-events:none}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+.hero-in{max-width:720px}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);display:inline-flex;gap:10px;align-items:center}
+.tag::before{content:"";width:28px;height:2px;background:var(--cyan)}
+.title{font-family:var(--display);font-size:clamp(52px,11vw,132px);line-height:.88;margin:.18em 0 .22em;text-wrap:balance;letter-spacing:-.01em}
+.title span{display:inline-block;animation:rise .9s cubic-bezier(.2,.9,.2,1.2) both, flick 6s 1.2s infinite}
+.title .b{color:var(--red);text-shadow:0 0 40px color-mix(in srgb,var(--red) 70%,transparent),4px 4px 0 #000}
+.title .a{color:var(--fg);text-shadow:4px 4px 0 var(--red)}
+@keyframes rise{from{opacity:0;transform:translateY(60%) rotate(8deg) scale(.6);filter:blur(8px)}}
+@keyframes flick{0%,96%,100%{opacity:1}97%{opacity:.35}98%{opacity:1}99%{opacity:.6}}
+.meta{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;color:var(--muted);font-weight:600;font-size:14px}
+.pill{border:1px solid var(--line);padding:2px 10px;border-radius:4px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--fg)}
+.pill.hot{border-color:var(--red);color:var(--red)}
+.desc{max-width:58ch;color:color-mix(in srgb,var(--fg) 82%,var(--muted));font-size:17px;margin:18px 0 28px}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:800;font-size:16px;transition:transform .2s,box-shadow .2s,background .2s}
+.btn svg{width:20px;height:20px}
+.btn.play{background:var(--red);color:#fff;box-shadow:0 10px 40px -8px var(--red)}
+.btn.play:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 14px 50px -6px var(--red)}
+.btn.ghost{background:color-mix(in srgb,var(--fg) 12%,transparent);backdrop-filter:blur(6px)}
+.btn.ghost:hover{background:color-mix(in srgb,var(--fg) 22%,transparent)}
+
+/* Sections */
+section{padding-block:28px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+h2{font-family:var(--display);font-size:clamp(22px,3vw,30px);margin:0;letter-spacing:.01em}
+h2 em{font-style:normal;color:var(--red)}
+.count{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.1em}
+
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;padding:10px 18px;border-radius:999px;border:1px solid var(--line);font-weight:600;font-size:14px;color:var(--muted);transition:all .25s;position:relative}
+.tab:hover{color:var(--fg);border-color:color-mix(in srgb,var(--red) 60%,var(--line))}
+.tab[aria-selected="true"]{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 6px 24px -6px var(--red)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px 18px;margin-top:20px}
+.row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,300px);gap:18px;overflow-x:auto;padding:6px 2px 18px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.row .card{scroll-snap-align:start}
+
+.card{text-align:left;display:flex;flex-direction:column;gap:10px;min-width:0;animation:cardIn .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 45ms)}
+@keyframes cardIn{from{opacity:.001;transform:translateY(24px) scale(.96)}}
+.thumb{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:10px;overflow:hidden;isolation:isolate;
+  background:
+   radial-gradient(120% 90% at 85% 10%,hsl(var(--h) 95% 55% / .85),transparent 55%),
+   radial-gradient(90% 80% at 10% 100%,hsl(calc(var(--h) + 40) 90% 45% / .7),transparent 60%),
+   linear-gradient(135deg,hsl(var(--h) 60% 12%),#06020a);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;box-shadow:0 0 0 1px var(--line)}
+.thumb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.22) 2px 3px);z-index:1}
+.thumb .mini{position:absolute;right:-14%;top:-30%;width:72%;opacity:.35;transition:transform 1.2s ease,opacity .4s}
+.thumb .num{position:absolute;left:14px;bottom:4px;font-family:var(--display);font-size:64px;line-height:1;color:transparent;-webkit-text-stroke:1.5px color-mix(in srgb,var(--fg) 70%,transparent);z-index:2;transition:color .35s}
+.thumb .code{position:absolute;right:12px;top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:4px;z-index:2}
+.thumb .pb{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.18);z-index:3}
+.thumb .pb i{display:block;height:100%;background:var(--red);box-shadow:0 0 10px var(--red)}
+.thumb .pl{position:absolute;inset:0;display:grid;place-items:center;z-index:3;opacity:0;transition:opacity .3s}
+.thumb .pl span{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--red);box-shadow:0 0 0 8px color-mix(in srgb,var(--red) 30%,transparent),0 0 40px var(--red);transform:scale(.6);transition:transform .35s cubic-bezier(.2,.9,.3,1.4)}
+.thumb .pl svg{width:24px;height:24px;margin-left:3px}
+.card:hover .thumb,.card:focus-visible .thumb{transform:translateY(-6px) scale(1.035);box-shadow:0 0 0 2px var(--red),0 18px 50px -12px var(--red)}
+.card:hover .pl,.card:focus-visible .pl{opacity:1}
+.card:hover .pl span,.card:focus-visible .pl span{transform:scale(1)}
+.card:hover .num{color:var(--fg)}
+.card:hover .mini{transform:rotate(72deg) scale(1.1);opacity:.6}
+.ct{font-weight:800;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.cm{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em;display:flex;gap:10px;flex-wrap:wrap}
+.cm .seen{color:var(--cyan)}
+.cm .nosrc{color:var(--gold)}
+
+footer{padding-block:40px 60px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:40px}
+
+/* Player */
+.player{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .35s}
+.player.open{opacity:1;pointer-events:auto}
+.player:not(.open) *{pointer-events:none!important}
+.player video{width:100%;height:100%;object-fit:contain;background:#000}
+.portal{position:absolute;inset:0;pointer-events:none;z-index:5;background:var(--red);opacity:0;clip-path:circle(0% at 50% 50%)}
+.player.opening .portal{animation:portal .8s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes portal{0%{opacity:1;clip-path:circle(0% at 50% 50%)}45%{opacity:1;clip-path:circle(75% at 50% 50%)}100%{opacity:0;clip-path:circle(75% at 50% 50%)}}
+.ui{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .4s;z-index:4}
+.player.idle .ui{opacity:0;cursor:none}
+.player.idle .ui *{pointer-events:none}
+.ui{pointer-events:none}.player.open .ui .top,.player.open .ui .bottom,.player.open .ui .big{pointer-events:auto}
+.top,.bottom{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:14px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:40px;background:linear-gradient(180deg,rgba(0,0,0,.8),transparent)}
+.top .tt{flex:1;min-width:0}
+.top small{font-family:var(--mono);color:var(--cyan);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.top h3{margin:0;font-family:var(--display);font-size:clamp(18px,2.4vw,26px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;transition:background .2s,transform .2s;flex:none}
+.ib:hover{background:rgba(255,255,255,.14);transform:scale(1.08)}
+.ib svg{width:24px;height:24px}
+.center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.big{pointer-events:auto;width:92px;height:92px;border-radius:50%;background:color-mix(in srgb,var(--red) 85%,transparent);display:grid;place-items:center;box-shadow:0 0 0 12px color-mix(in srgb,var(--red) 25%,transparent),0 0 60px var(--red);transition:transform .25s,opacity .25s}
+.big svg{width:36px;height:36px}
+.big.hidden{opacity:0;transform:scale(.5);pointer-events:none}
+.flash{position:absolute;font-family:var(--display);font-size:28px;padding:14px 22px;border-radius:14px;background:rgba(0,0,0,.6);opacity:0;transition:opacity .3s}
+.flash.on{opacity:1;transition:none}
+.spin{position:absolute;width:64px;height:64px;border:4px solid rgba(255,255,255,.15);border-top-color:var(--red);border-radius:50%;animation:rot 0.8s linear infinite;opacity:0}
+.player.loading .spin{opacity:1}
+@keyframes rot{to{transform:rotate(360deg)}}
+.bottom{padding-top:50px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,rgba(0,0,0,.85),transparent)}
+.seek{position:relative;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.seek .tr{position:relative;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.2);transition:height .15s}
+.seek:hover .tr{height:7px}
+.seek .buf,.seek .fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.seek .buf{background:rgba(255,255,255,.3)}
+.seek .fill{background:linear-gradient(90deg,var(--pink),var(--red));box-shadow:0 0 12px var(--red)}
+.seek .knob{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px var(--red);transform:scale(0);transition:transform .15s}
+.seek:hover .knob{transform:scale(1)}
+.seek .tip{position:absolute;bottom:26px;transform:translateX(-50%);font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:3px 8px;border-radius:4px;opacity:0;pointer-events:none;white-space:nowrap}
+.seek:hover .tip{opacity:1}
+.ctrl{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ctrl .sp{flex:1}
+.time{font-family:var(--mono);font-size:13px;color:var(--muted);margin-left:8px;font-variant-numeric:tabular-nums}
+.vol{display:flex;align-items:center}
+.vol input{width:0;opacity:0;transition:width .25s,opacity .25s;accent-color:var(--red)}
+.vol:hover input,.vol input:focus{width:90px;opacity:1}
+.speed{font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:8px}
+.speed:hover{background:rgba(255,255,255,.14)}
+@media (max-width:560px){
+  .vol{display:none}
+  .time{font-size:12px;margin-left:2px}
+  .ib{width:40px;height:40px}
+  .ctrl{gap:2px;flex-wrap:nowrap}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
+  .row{grid-auto-columns:minmax(200px,230px)}
+  .thumb .num{font-size:44px;left:10px}
+  .thumb .code{font-size:10px;padding:2px 6px;right:8px;top:8px}
+  .ct{font-size:14px}
+  .cm{font-size:10.5px;gap:6px}
+  .hero{padding-block:110px 40px}
+  .desc{font-size:15px}
+  .btn{padding:12px 20px;font-size:15px}
+  .big{width:76px;height:76px}
+  .next{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+}
+@media (hover:none){
+  header.solid{backdrop-filter:none;background:color-mix(in srgb,var(--bg) 94%,transparent)}
+  .seek{height:32px}
+  .seek .tr{height:6px}
+  .seek .knob{transform:scale(1)}
+  .card:active .thumb{transform:scale(.97)}
+}
+.tap{position:absolute;top:0;bottom:0;width:35%;display:grid;place-items:center;font-family:var(--display);font-size:22px;opacity:0;pointer-events:none;transition:opacity .4s;z-index:3}
+.tap.l{left:0;background:radial-gradient(circle at 0 50%,rgba(255,255,255,.18),transparent 70%)}
+.tap.r{right:0;background:radial-gradient(circle at 100% 50%,rgba(255,255,255,.18),transparent 70%)}
+.tap.on{opacity:1;transition:none}
+
+.next{position:absolute;right:max(20px,env(safe-area-inset-right,0px));bottom:calc(120px + env(safe-area-inset-bottom,0px));width:min(320px,calc(100% - 40px));background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:14px;padding:16px;z-index:6;transform:translateY(20px);opacity:0;pointer-events:none;transition:all .35s}
+.next.on{transform:none;opacity:1;pointer-events:auto}
+.next small{font-family:var(--mono);color:var(--cyan);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.next b{display:block;font-size:17px;margin:4px 0 12px}
+.next .r{display:flex;gap:8px}
+.next .r button{flex:1;padding:10px;border-radius:10px;font-weight:800;font-size:14px}
+.next .go{background:var(--red);color:#fff;position:relative;overflow:hidden}
+.next .go i{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.25);width:0}
+.next .no{background:rgba(255,255,255,.1)}
+.err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:3}
+.err div{max-width:46ch;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.err b{font-family:var(--display);font-size:22px;color:var(--gold);display:block;margin-bottom:8px}
+.err code{font-family:var(--mono);color:var(--cyan);font-size:13px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
-</head>
-<body>
 
-<header>
-    <div class="header-left">
-        <button id="backBtn" class="icon-btn btn-back hidden" aria-label="Retour">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span>Retour</span>
-        </button>
-        <div class="logo" id="homeLogo">VoxFlix<span class="dot"></span></div>
-    </div>
-    <div class="header-right">
-        <button id="langBtn" class="icon-btn btn-back hidden" aria-label="Changer la langue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span id="langBtnText">VF</span>
-        </button>
-        <button id="homeBtn" class="icon-btn" aria-label="Accueil">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </button>
-    </div>
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pent" viewBox="0 0 200 200"><g fill="none" stroke="currentColor"><circle cx="100" cy="100" r="96" stroke-width="2"/><circle cx="100" cy="100" r="86" stroke-width="1"/><path d="M100 14 L150.6 169.6 L18.2 73.4 L181.8 73.4 L49.4 169.6 Z" stroke-width="2.5" stroke-linejoin="round"/></g></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></g><text x="12" y="15.5" font-size="7" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-weight="700">10</text></symbol>
+    <symbol id="i-fwd" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/></g><text x="12" y="15.5" font-size="7" text-anchor="middle" fill="currentColor" font-family="sans-serif" font-weight="700">10</text></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path fill="currentColor" d="M5 5.2v13.6a.8.8 0 0 0 1.2.7L16 13v6h3V5h-3v6L6.2 4.5A.8.8 0 0 0 5 5.2z"/></symbol>
+    <symbol id="i-fs" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<header id="hdr">
+  <div class="wrap nav">
+    <span class="logo" data-t="VOXFLIX">VOXFLIX</span>
+    <div class="sw" id="sw" role="group" aria-label="Série"></div>
+    <a href="#episodes" class="hide-sm">Épisodes</a>
+    <a href="#resume" class="hide-sm" id="navResume" hidden>Reprendre</a>
+    <span class="sp"></span>
+    <span class="live"><i></i>Diffusion depuis l'Anneau de l'Orgueil</span>
+  </div>
 </header>
 
-<main id="app">
-    <div class="loader-wrap">
-        <div class="loader"></div>
-        <div class="loader-text">Chargement</div>
+<main id="top">
+  <div class="hero">
+    <div class="hero-bg"><div class="pent-glow"></div><svg class="pent" style="color:var(--red)"><use href="#pent"/></svg></div>
+    <div class="wrap" style="width:100%">
+      <div class="hero-in" id="heroIn">
+        <span class="tag" id="heroTag"></span>
+        <h1 class="title" id="heroTitle"></h1>
+        <div class="meta">
+          <span class="pill hot">16+</span><span id="heroYears"></span><span id="heroCount"></span><span class="pill">HD</span><span id="heroGenre"></span>
+        </div>
+        <p class="desc" id="heroDesc"></p>
+        <div class="ctas">
+          <button class="btn play" id="heroPlay"><svg><use href="#i-play"/></svg><span id="heroPlayLbl">Regarder le pilote</span></button>
+          <a class="btn ghost" href="#episodes" style="text-decoration:none;color:inherit"><svg><use href="#i-list"/></svg>Tous les épisodes</a>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <section id="resume" hidden>
+    <div class="wrap">
+      <div class="sh"><h2>Reprendre <em>la mission</em></h2></div>
+      <div class="row" id="resumeRow"></div>
+    </div>
+  </section>
+
+  <section id="episodes">
+    <div class="wrap">
+      <div class="sh"><h2>Saisons <em>&amp;</em> épisodes</h2><div class="right"><div class="lang" id="langSec" role="group" aria-label="Langue" hidden></div><span class="count" id="seasonCount"></span></div></div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
 </main>
 
-<!-- Player -->
-<div id="playerContainer" class="player hidden">
-    <div class="player-top">
-        <button id="exitBtn" class="icon-btn" aria-label="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </button>
-        <div class="player-title" id="playerTitle"></div>
-        <div style="width:40px"></div>
-    </div>
+<footer>
+  <div class="wrap">Site fan non officiel. Helluva Boss et Hazbin Hotel sont des créations de Vivienne Medrano / SpindleHorse Toons.</div>
+</footer>
 
-    <video id="videoPlayer" playsinline></video>
-
-    <div class="player-bottom">
-        <div class="timeline" id="timeline">
-            <div class="timeline-track">
-                <div class="timeline-progress" id="timelineProgress">
-                    <div class="timeline-handle"></div>
-                </div>
-            </div>
-        </div>
-        <div class="controls">
-            <div class="controls-group">
-                <button class="player-btn primary" id="playPauseBtn" aria-label="Lecture/Pause">
-                    <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
-                </button>
-                <div class="volume-wrap">
-                    <button class="player-btn" id="muteBtn" aria-label="Muet">
-                        <svg id="volumeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-                        <svg id="mutedIcon" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-                    </button>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="1">
-                </div>
-                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
-            </div>
-            <div class="controls-group">
-                <button class="player-btn" id="langSelectorBtn" aria-label="Changer la langue" style="display:none">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                </button>
-                <a id="downloadBtn" class="player-btn" href="#" download aria-label="Télécharger">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </a>
-                <button class="player-btn" id="fullscreenBtn" aria-label="Plein écran">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                </button>
-            </div>
-        </div>
+<div class="player" id="player" aria-hidden="true">
+  <video id="vid" playsinline preload="metadata"></video>
+  <div class="err" id="err" hidden><div><b>Pas encore de lien</b>Ajoute l'URL .mp4 de cet épisode dans le tableau <code>SERIES</code> en bas du fichier (champ <code>src</code>).</div></div>
+  <div class="tap l" id="tapL">« 10 s</div><div class="tap r" id="tapR">10 s »</div>
+  <div class="portal"></div>
+  <div class="ui" id="ui">
+    <div class="top">
+      <div class="tt"><small id="pCode"></small><h3 id="pTitle"></h3></div>
+      <button class="ib" id="pClose" aria-label="Fermer le lecteur"><svg><use href="#i-x"/></svg></button>
     </div>
-
-    <!-- Resume Overlay -->
-    <div id="resumeOverlay" class="overlay hidden">
-        <div class="resume-card">
-            <div class="overlay-eyebrow">Reprendre la lecture</div>
-            <div class="overlay-title" id="resumeTitle">Épisode</div>
-            <div class="resume-time" id="resumeTime">0:00</div>
-            <div class="resume-actions">
-                <button class="btn-cta" id="resumeBtn" style="margin-top:0">
-                    <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M8 5v14l11-7z"/></svg>
-                    Reprendre
-                </button>
-                <button class="btn-secondary" id="restartBtn">Recommencer du début</button>
-            </div>
-        </div>
+    <div class="center">
+      <div class="spin"></div>
+      <button class="big" id="pBig" aria-label="Lecture"><svg><use href="#i-play"/></svg></button>
+      <div class="flash" id="flash"></div>
     </div>
-
-    <!-- Lang Selector Overlay -->
-    <div id="langOverlay" class="overlay hidden">
-        <div class="overlay-card">
-            <div class="overlay-eyebrow">Audio</div>
-            <div class="overlay-title">Choisir la langue</div>
-            <div class="lang-options" id="langOptionsList"></div>
-            <button class="btn-secondary" id="closeLangBtn">Annuler</button>
-        </div>
+    <div class="bottom">
+      <div class="seek" id="seek" role="slider" aria-label="Position" tabindex="0">
+        <div class="tr"><div class="buf" id="buf"></div><div class="fill" id="fill"></div><div class="knob" id="knob"></div></div>
+        <div class="tip" id="tip">0:00</div>
+      </div>
+      <div class="ctrl">
+        <button class="ib" id="pPlay" aria-label="Lecture / pause"><svg><use href="#i-play"/></svg></button>
+        <button class="ib" id="pBack" aria-label="Reculer de 10 secondes"><svg><use href="#i-back"/></svg></button>
+        <button class="ib" id="pFwd" aria-label="Avancer de 10 secondes"><svg><use href="#i-fwd"/></svg></button>
+        <div class="vol"><button class="ib" id="pMute" aria-label="Couper le son"><svg><use href="#i-vol"/></svg></button><input type="range" id="pVol" min="0" max="1" step="0.05" value="1" aria-label="Volume"></div>
+        <span class="time" id="pTime">0:00 / 0:00</span>
+        <span class="sp"></span>
+        <div class="lang inplayer" id="langPl" role="group" aria-label="Langue" hidden></div>
+        <button class="speed" id="pSpeed" aria-label="Vitesse de lecture">1×</button>
+        <button class="ib" id="pNext" aria-label="Épisode suivant"><svg><use href="#i-next"/></svg></button>
+        <button class="ib" id="pFs" aria-label="Plein écran"><svg><use href="#i-fs"/></svg></button>
+      </div>
     </div>
-
-    <!-- Next Episode -->
-    <div id="nextOverlay" class="overlay hidden">
-        <div class="overlay-card">
-            <div class="overlay-eyebrow">Épisode terminé</div>
-            <div class="overlay-title">À suivre…</div>
-            <button class="btn-cta" id="nextEpisodeBtn">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M8 5v14l11-7z"/></svg>
-                Épisode suivant
-            </button>
-            <button class="btn-secondary" id="closeNextBtn">Rester ici</button>
-        </div>
-    </div>
+  </div>
+  <div class="next" id="next">
+    <small>Épisode suivant</small><b id="nextTitle"></b>
+    <div class="r"><button class="go" id="nextGo"><i id="nextBar"></i><span>Lecture</span></button><button class="no" id="nextNo">Annuler</button></div>
+  </div>
 </div>
 
 <script>
-// ============= DATA =============
-const SERIES_META = {
-    hazbin: {
-        name: 'Hazbin Hotel',
-        tagline: 'Bienvenue au pire hôtel de l\'enfer.',
-        logo: './Hazbin-Hotel-Logo.png',
-        accent: '#ff2d6f'
-    },
-    helluva: {
-        name: 'Helluva Boss',
-        tagline: 'Une agence d\'assassinat un peu trop chaotique.',
-        logo: './Helluva_Boss_transparent_logo.webp',
-        accent: '#e63946'
+/* ============================================================
+   SÉRIES — colle tes liens .mp4 dans "src"
+   Pour ajouter une série : copie un bloc { id, nom, ... } entier.
+   Avec 2 langues : ajoute langues:['VF','VOSTFR'] et mets src:{ VF:'...', VOSTFR:'...' }
+   ============================================================ */
+const SERIES = [
+  {
+    id:'helluva', nom:'Helluva Boss', titre:['HELLUVA','BOSS'],
+    tag:'Série originale · I.M.P', annees:'2019 – 2026', genre:'Comédie noire · Musical',
+    desc:"En Enfer, le diablotin Blitzø dirige I.M.P, une petite boîte d'assassins qui monte sur Terre grâce à un grimoire emprunté à un prince des Enfers. Avec Moxxie, Millie et Loona, il essaie de garder l'entreprise à flot sans s'entretuer.",
+    couleurs:{ red:'#ff1f4b', pink:'#ff4fa3' },
+    saisons:[
+      { id:'p', nom:'Pilote', hue:345, eps:[
+        { t:'MISSION ZERO', an:2019, min:'', src:'https://store-eu-par-1.gofile.io/download/direct/9999bcf7-ccf6-4c61-990d-d8e914f809db/clean_S01E001_MISSION%20Z%C3%89RO.mp4' },
+      ]},
+      { id:'s1', nom:'Saison 1', hue:352, eps:[
+        { t:'Une famille sanguinaire', an:2020, min:'', src:'https://store5.gofile.io/download/direct/fd0e9d3c-7b6c-42a7-8544-7df3a7606454/new_S02E001_Une%20famille%20sanguinaire.mp4' },
+        { t:'Loo Loo Land', an:2020, min:'', src:'https://store-eu-par-3.gofile.io/download/direct/46b43239-6d3b-4b1b-8815-d353837c0145/new_S02E002_Loo%20Loo%20Land.mp4' },
+        { t:'Duel de démons', an:2020, min:'', src:'https://store5.gofile.io/download/direct/3afd5734-2d02-4369-9d09-b41efeece3bf/new_S02E003_Duel%20de%20d%C3%A9mons.mp4' },
+        { t:'C.H.E.R.U.B.', an:2021, min:'', src:'https://store-eu-par-3.gofile.io/download/direct/b74d6870-6d2d-4300-bbad-f1c642554637/new_S02E004_CHERUB.mp4' },
+        { t:'Le Festival de la Lune des Moissons', an:2021, min:'', src:'https://store5.gofile.io/download/direct/b6be085b-3b81-41ce-9212-734b4a3f7aff/new_S02E005_Le%20Festival%20de%20la%20Lune%20des%20Moissons.mp4' },
+        { t:'Chasseurs de démons', an:2021, min:'', src:'https://store-eu-par-3.gofile.io/download/direct/bbfa7f44-8764-4ee0-9ca6-c726f5438aa2/new_S02E006_Chasseurs%20de%20d%C3%A9mons.mp4' },
+        { t:"OZZIE'S", an:2021, min:'', src:'https://store5.gofile.io/download/direct/e5ff00cf-0610-4c5d-bde1-f7ee4adfa2a5/new_S02E007_Chez%20Ozzie.mp4' },
+        { t:'Queen Bee', an:2023, min:'', src:'https://store5.gofile.io/download/direct/2ce4739e-57e0-49d9-a9db-b3d278c01b77/new_S02E008_Queen%20Bee.mp4' },
+      ]},
+      { id:'s2', nom:'Saison 2', hue:322, eps:[
+        { t:'Le Cirque', an:2022, min:23, src:'https://store5.gofile.io/download/direct/14f78d0e-1964-473c-b244-432850ca0312/new_S03E001_Le%20Cirque.mp4' },
+        { t:'Sous les étoiles', an:2022, min:21, src:'https://store5.gofile.io/download/direct/db857323-2848-4483-97d4-96009aaa654f/new_S03E002_Sous%20les%20%C3%A9toiles.mp4' },
+        { t:'Un ex pour deux', an:2023, min:25, src:'https://store5.gofile.io/download/direct/9e6b8d9b-7879-43f2-a15f-577b3f45f0a6/new_S03E003_Un%20ex%20pour%20deux.mp4' },
+        { t:'Un air de western', an:2023, min:19, src:'https://store5.gofile.io/download/direct/b18cfe0f-b61a-4455-87a8-ec54ff38b162/new_S03E004_Un%20air%20de%20western.mp4' },
+        { t:"Un camp d'enfer", an:2023, min:21, src:'https://store5.gofile.io/download/direct/0220c704-d945-462a-bcb0-fc7f9f0566ab/new_S03E005_Un%20Camp%20dEnfer.mp4' },
+        { t:'Oops', an:2023, min:27, src:'https://store5.gofile.io/download/direct/ced549b2-5da0-4758-a8a7-d48ac1eaa783/new_S03E006_Oups.mp4' },
+        { t:"Ça c'est du spectacle", an:2023, min:30, src:'https://store-eu-par-3.gofile.io/download/direct/e80ed01b-3de7-4daa-bf59-634e831019b4/new_S03E007_%C3%87a%20cest%20du%20spectacle.mp4' },
+        { t:'La pleine lune', an:2024, min:23, src:'https://store5.gofile.io/download/direct/7420a991-a45d-4984-bbea-076a69a08074/new_S03E008_La%20Pleine%20lune.mp4' },
+        { t:'La tournée des excuses', an:2024, min:22, src:'https://store5.gofile.io/download/direct/1c0aee47-e69f-48d3-9a6a-fe9fa44e9a8c/new_S03E009_La%20tourn%C3%A9e%20des%20excuses.mp4' },
+        { t:'Baise O S Fantômes', an:2024, min:27, src:'https://store5.gofile.io/download/direct/ecdaaaca-2ae8-4432-9424-06e98b605e9f/new_S03E010_Baise%20O%20S%20Fant%C3%B4mes.mp4' },
+        { t:'Le grand maître', an:2024, min:22, src:'https://store5.gofile.io/download/direct/13eca112-eaf3-439f-885d-1c16f42bd62e/new_S03E011_Le%20grand%20ma%C3%AEtre.mp4' },
+        { t:'La fête des Péchés', an:2024, min:29, src:'https://store5.gofile.io/download/direct/423a0ac5-176b-4c5f-98c7-94c666b82700/new_S03E012_La%20f%C3%AAte%20des%20P%C3%A9ch%C3%A9s.mp4' },
+      ]},
+      { id:'s3', nom:'Saison 3', hue:12, eps:[
+        { t:'Émoji Tortue', an:2026, min:'', src:'https://store1.gofile.io/download/direct/c21c44e9-1aef-47dc-9740-4c27ce4b2633/Helluva%20Boss%20S03E01%20Turtle%20Emoji%201080p%20AMZN.mp4' },
+        { t:' Mauvaise Réputation', an:2026, min:'', src:'https://store5.gofile.io/download/direct/6a68efaa-6154-4c23-9791-75e759725815/Helluva%20Boss%20S03E02%20Bad%20Reputation%201080p%20AMZN.mp4' },
+        { t:'La Gympie Gympie', an:2026, min:'', src:'https://store-eu-par-10.gofile.io/download/direct/b7256a6b-aea3-4173-b886-b2925813cc58/Helluva%20Boss%20S03E03%20Gimpy%20Gimpy%201080p%20AMZN.mp4' },
+        { t:'Le procès', an:2026, min:'', src:'https://store-eu-par-8.gofile.io/download/direct/15a630f8-b054-437a-acc4-cd02c5e3a946/Helluva%20Boss%20S03E04%20A%20Trial%20of%20Errors%201080p%20AMZN.mp4' },
+        { t:"Enchères d'Enfer", an:2026, min:'', src:'https://store5.gofile.io/download/direct/824b32ee-fef8-4910-a615-3d2b58b695f2/Helluva%20Boss%20S03E05%20The%20Auction%201080p%20AMZN.mp4' },
+      ]},
+    ],
+  },
+  {
+    id:'hazbin', nom:'Hazbin Hotel', titre:['HAZBIN','HOTEL'],
+    tag:'Série originale · Happy Hotel', annees:'2019 – 2025', genre:'Comédie musicale · Fantastique',
+    desc:"Charlie Morningstar, princesse des Enfers, ouvre un hôtel pour réhabiliter les pécheurs et leur offrir une chance d'aller au Paradis, plutôt que de les voir tomber lors de l'extermination annuelle des anges.",
+    couleurs:{ red:'#ff2e7e', pink:'#ffc24b' },
+    langues:['VF','VOSTFR'],   // src:{ VF:'lien.mp4', VOSTFR:'lien.mp4' }
+    saisons:[
+      { id:'s1', nom:'Saison 1', hue:335, eps:[
+        { t:"Histoire De L'Enfer", an:2024, min:'', src:{ VF:'https://cold8.gofile.io/download/direct/f813c55e-facf-4e74-b291-bad048721f64/Hazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4', VOSTFR:'https://cold2.gofile.io/download/direct/1e24501c-0f30-4925-8a7f-713020f8af63/%5BVOSTFR%5DHazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4' } },
+        { t:'Radio Contre Vidéo', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold8.gofile.io/download/direct/175be20b-b002-42cd-b7b1-4afc27d0ac45/%5BVOSTFR%5DHazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4' } },
+        { t:'Oeufs Brouillés', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold-na-phx-1.gofile.io/download/direct/9c175380-7011-41e5-8bcf-2778b985b67d/%5BVOSTFR%5DHazbin%20Hotel%20S01e03%20Oeufs%20Brouill%C3%A9s.mp4' } },
+        { t:'Mascarade', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold-na-phx-1.gofile.io/download/direct/74bce63b-9c1b-4a6d-8230-ee572424333f/%5BVOSTFR%5DHazbin%20Hotel%20S01e04%20Mascarade.mp4' } },
+        { t:'Lucifer Entre En Scène', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold-na-phx-1.gofile.io/download/direct/73583f43-07c8-4b97-8253-4055ba618655/%5BVOSTFR%5DHazbin%20Hotel%20S01e05%20Lucifer%20entre%20en%20sc%C3%A8ne.mp4' } },
+        { t:'Sur Les Chemins De La Rédemption', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold4.gofile.io/download/direct/8fccfa23-01d5-4de7-b367-16a79431319a/%5BVOSTFR%5DHazbin%20Hotel%20S01e06%20Sur%20Les%20Chemins%20De%20La%20R%C3%A9demption.mp4' } },
+        { t:'Hello Rosie!', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold-na-phx-2.gofile.io/download/direct/02262a23-1f55-407c-884d-ea419d8134e3/%5BVOSTFR%5DHazbin%20Hotel%20S01e07%20Hello%20Rosie!.mp4' } },
+        { t:'Le Grand Final', an:2024, min:'', src:{ VF:'', VOSTFR:'https://cold8.gofile.io/download/direct/483a7d0f-71e6-4f25-9dea-fdfd861035c4/%5BVOSTFR%5DHazbin%20Hotel%20S01e08%20Le%20Grand%20Final.mp4' } },
+      ]},
+      { id:'s2', nom:'Saison 2', hue:40, eps:[
+        { t:'Pentious au Paradis', an:2025, min:28, src:{ VF:'https://cold2.gofile.io/download/direct/d6b94c60-903d-4bb2-8dd1-31188b7b57b2/S02E001_Pentious%20au%20Paradis.mp4', VOSTFR:'https://store1.gofile.io/download/direct/fbaa37e6-5207-4dbf-8cd5-b6e60ee45ec6/S02E001_Pentious%20au%20Paradis.mp4' } },
+        { t:"L'histoire de Pentious", an:2025, min:28, src:{ VF:'https://store5.gofile.io/download/direct/d29f6629-b713-4da6-a1a6-e78671ede900/S02E002_Lhistoire%20de%20Pentious.mp4', VOSTFR:'https://store-eu-par-6.gofile.io/download/direct/033fdea1-68d0-405a-88d6-6a2512bf3b38/S02E002_Lhistoire%20de%20Pentious.mp4' } },
+        { t:"L'envers du décor", an:2025, min:28, src:{ VF:'https://store5.gofile.io/download/direct/5f56ba4d-925e-4802-9d26-a365117c39e2/%5BVF%5D%20S02E003_Lenvers%20du%20d%C3%A9cor.mp4', VOSTFR:'https://store-eu-par-6.gofile.io/download/direct/4c787aba-11a2-474c-9d96-a9a5f7f7f342/%5BVOSTFR%5D%20S02E003_Lenvers%20du%20d%C3%A9cor.mp4' } },
+        { t:"Marché conclu", an:2025, min:30, src:{ VF:'https://store10.gofile.io/download/direct/d32a157e-1d5e-436b-9fbd-aceec4b876e1/%5BVF%5D%20S02E004_March%C3%A9%20conclu.mp4', VOSTFR:'https://store-eu-par-6.gofile.io/download/direct/88317e28-835f-4078-ba4c-20c1955a76fd/%5BVOSTFR%5D%20S02E004_March%C3%A9%20conclu.mp4' } },
+        { t:'Réduite au Silence', an:2025, min:28, src:{ VF:'https://store1.gofile.io/download/direct/887f6b52-b255-40a9-8d7b-0d5216222ad3/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4', VOSTFR:'https://store5.gofile.io/download/direct/47943cd0-a512-47c6-a344-50e94830fc6e/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4' } },
+        { t:'Pluie hurlante', an:2025, min:28, src:{ VF:'https://store5.gofile.io/download/direct/f4090ab9-3eb5-4087-8145-ed6bab18e4cd/Hazbin%20Hotel_S02E06_Pluie%20hurlante.mp4', VOSTFR:'https://store4.gofile.io/download/direct/3ba1769d-9afc-4b49-8a41-5ba291055a7f/Hazbin%20Hotel_S02E06_Pluie%20Hurlante.mp4' } },
+        { t:'Arme De Destruction Massive', an:2025, min:29, src:{ VF:'https://store2.gofile.io/download/direct/5eff1f55-7988-441d-beff-460aa3f46b01/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VF.mp4', VOSTFR:'https://store10.gofile.io/download/direct/a242db0b-3b78-4197-ad90-538dcae0ebd1/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VOTSFR.mp4' } },
+        { t:'Rappel', an:2025, min:38, src:{ VF:'https://cold-na-phx-7.gofile.io/download/direct/f6b1c039-3f1d-4072-b06e-3ed1f6b26585/S02E008_Rappel%20VF.mp4', VOSTFR:'https://store-eu-par-2.gofile.io/download/direct/5539c571-6b62-4d66-809a-0e1c6d5569eb/S02E008_Rappel%20VOSTFR.mp4' } },
+      ]},
+    ],
+  },
+];
+/* ============================================================ */
+
+const $ = s => document.querySelector(s);
+const EPS = [];
+SERIES.forEach(sr => {
+  sr.eps = [];
+  sr.saisons.forEach(s => s.eps.forEach((e,i) => {
+    e.sr = sr; e.s = s; e.n = i+1; e.si = sr.eps.length; e.idx = EPS.length;
+    e.id = `${sr.id}-${s.id}-${i+1}`;
+    e.code = s.id === 'p' ? 'PILOTE' : `S${s.id.slice(1).padStart(2,'0')}E${String(i+1).padStart(2,'0')}`;
+    sr.eps.push(e); EPS.push(e);
+  }));
+});
+const nextOf = e => e.sr.eps[e.si + 1];
+
+/* ---------- langue ---------- */
+let lang = {};
+try { lang = JSON.parse(localStorage.getItem('voxflix-lang') || '{}') || {}; } catch(_) {}
+const langOf = sr => sr.langues ? (sr.langues.includes(lang[sr.id]) ? lang[sr.id] : sr.langues[0]) : null;
+const srcOf = (e, l = langOf(e.sr)) => typeof e.src === 'string' ? e.src : ((e.src || {})[l] || '');
+function renderLang(box, sr, onPick){
+  box.hidden = !sr.langues; box.innerHTML = '';
+  if (!sr.langues) return;
+  sr.langues.forEach(l => {
+    const b = document.createElement('button');
+    b.textContent = l; b.setAttribute('aria-pressed', l === langOf(sr));
+    b.onclick = () => { lang[sr.id] = l; try { localStorage.setItem('voxflix-lang', JSON.stringify(lang)); } catch(_) {} onPick(l); };
+    box.appendChild(b);
+  });
+}
+
+/* ---------- progression (localStorage, best effort) ---------- */
+let prog = {};
+try { prog = JSON.parse(localStorage.getItem('voxflix-prog') || '{}'); } catch(_) {}
+const saveProg = () => { try { localStorage.setItem('voxflix-prog', JSON.stringify(prog)); } catch(_) {} };
+const pct = e => { const p = prog[e.id]; return p && p.d ? Math.min(1, p.t / p.d) : 0; };
+
+const fmt = s => { s = Math.max(0, Math.floor(s||0)); const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = String(s%60).padStart(2,'0'); return h ? `${h}:${String(m).padStart(2,'0')}:${x}` : `${m}:${x}`; };
+
+/* ---------- état ---------- */
+let curSerie = SERIES[0], curSeason = {};
+try { curSeason = JSON.parse(localStorage.getItem('voxflix-season') || '{}') || {}; } catch(_) {}
+(() => {
+  const h = location.hash.slice(1);
+  let saved; try { saved = localStorage.getItem('voxflix-serie'); } catch(_) {}
+  curSerie = SERIES.find(x => x.id === h) || SERIES.find(x => x.id === saved) || SERIES[0];
+})();
+const seasonOf = sr => sr.saisons.find(s => s.id === curSeason[sr.id]) || sr.saisons[0];
+
+/* ---------- hero ---------- */
+function renderHero(){
+  const sr = curSerie;
+  let k = 0;
+  $('#heroTitle').setAttribute('aria-label', sr.nom);
+  $('#heroTitle').innerHTML = sr.titre.map((w,wi) => `<span style="display:block;animation:none">${[...w].map(c => `<span class="${wi? 'b':'a'}" style="animation-delay:${(k++)*55}ms, ${1200+Math.random()*4000|0}ms">${c}</span>`).join('')}</span>`).join('');
+  $('#heroTag').textContent = sr.tag;
+  $('#heroYears').textContent = sr.annees;
+  $('#heroGenre').textContent = sr.genre;
+  $('#heroDesc').textContent = sr.desc;
+  const nS = sr.saisons.filter(s => s.id !== 'p').length;
+  $('#heroCount').textContent = `${nS} saison${nS>1?'s':''} · ${sr.eps.length} épisodes`;
+  const hi = $('#heroIn'); hi.classList.remove('swap'); void hi.offsetWidth; hi.classList.add('swap');
+}
+function nextUp(sr){
+  const started = sr.eps.filter(e => prog[e.id] && pct(e) < .95).sort((a,b) => prog[b.id].at - prog[a.id].at);
+  if (started.length) return started[0];
+  return sr.eps.find(e => pct(e) < .95) || sr.eps[0];
+}
+function refreshHero(){
+  const e = nextUp(curSerie);
+  const p = prog[e.id];
+  $('#heroPlayLbl').textContent = p && pct(e) < .95 ? `Reprendre ${e.code}` : (e.si === 0 ? 'Regarder le pilote' : `Lecture ${e.code}`);
+  $('#heroPlay').onclick = () => openPlayer(e);
+}
+
+/* ---------- cards ---------- */
+function card(e, i, showSerie){
+  const b = document.createElement('button');
+  b.className = 'card';
+  b.style.setProperty('--i', i);
+  const p = pct(e);
+  b.innerHTML = `
+    <div class="thumb" style="--h:${e.s.hue + (e.n*9)%40}">
+      <svg class="mini" style="color:hsl(${e.s.hue} 100% 70%)"><use href="#pent"/></svg>
+      <span class="code">${e.code}</span>
+      <span class="num">${e.s.id==='p' ? '0' : e.n}</span>
+      <div class="pl"><span><svg><use href="#i-play"/></svg></span></div>
+      ${p > 0.01 ? `<div class="pb"><i style="width:${p*100}%"></i></div>` : ''}
+    </div>
+    <div class="ct"></div>
+    <div class="cm">${showSerie ? `<span class="sr">${e.sr.nom}</span>` : ''}<span>${e.an}</span>${e.min ? `<span>${e.min} min</span>` : ''}${p >= .95 ? '<span class="seen">✓ Vu</span>' : ''}${e.sr.langues ? `<span>${langOf(e.sr)}</span>` : ''}${!srcOf(e) ? '<span class="nosrc">lien manquant</span>' : ''}</div>`;
+  b.querySelector('.ct').textContent = e.t;
+  b.setAttribute('aria-label', `${e.sr.nom} ${e.code} ${e.t}`);
+  b.onclick = () => openPlayer(e);
+  return b;
+}
+
+function renderSwitch(){
+  const w = $('#sw'); w.innerHTML = '';
+  SERIES.forEach(sr => {
+    const b = document.createElement('button');
+    b.textContent = sr.nom;
+    b.setAttribute('aria-pressed', sr === curSerie);
+    b.onclick = () => setSerie(sr);
+    w.appendChild(b);
+  });
+}
+function setSerie(sr){
+  if (sr === curSerie) return;
+  curSerie = sr;
+  try { localStorage.setItem('voxflix-serie', sr.id); } catch(_) {}
+  try { history.replaceState(null, '', '#' + sr.id); } catch(_) {}
+  applyColors(); renderSwitch(); renderHero(); renderTabs(); renderGrid(); refreshHero();
+  scrollTo({top:0, behavior:'smooth'});
+}
+function applyColors(){
+  const r = document.documentElement.style;
+  r.setProperty('--red', curSerie.couleurs.red);
+  r.setProperty('--pink', curSerie.couleurs.pink);
+}
+function renderTabs(){
+  const t = $('#tabs'); t.innerHTML = '';
+  const cs = seasonOf(curSerie);
+  curSerie.saisons.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'tab'; b.role = 'tab'; b.textContent = s.nom;
+    b.setAttribute('aria-selected', s === cs);
+    b.onclick = () => { curSeason[curSerie.id] = s.id; try{localStorage.setItem('voxflix-season', JSON.stringify(curSeason))}catch(_){}; renderTabs(); renderGrid(); };
+    t.appendChild(b);
+  });
+}
+function renderGrid(){
+  const s = seasonOf(curSerie);
+  const g = $('#grid'); g.innerHTML = '';
+  s.eps.forEach((e,i) => g.appendChild(card(e,i,false)));
+  renderLang($('#langSec'), curSerie, () => renderGrid());
+  $('#seasonCount').textContent = `${curSerie.nom.toUpperCase()} · ${s.eps.length} ÉPISODE${s.eps.length>1?'S':''}`;
+}
+function renderResume(){
+  const list = EPS.filter(e => prog[e.id] && pct(e) > .01 && pct(e) < .95).sort((a,b) => prog[b.id].at - prog[a.id].at);
+  $('#resume').hidden = !list.length; $('#navResume').hidden = !list.length;
+  const r = $('#resumeRow'); r.innerHTML = '';
+  list.forEach((e,i) => r.appendChild(card(e,i,true)));
+}
+function renderAll(){ renderSwitch(); renderTabs(); renderGrid(); renderResume(); refreshHero(); }
+applyColors(); renderHero(); renderAll();
+addEventListener('hashchange', () => { const sr = SERIES.find(x => x.id === location.hash.slice(1)); if (sr) setSerie(sr); });
+
+addEventListener('scroll', () => $('#hdr').classList.toggle('solid', scrollY > 30), {passive:true});
+
+/* ---------- player ---------- */
+const P = $('#player'), V = $('#vid');
+let cur = null, idleT, saveT, nextT;
+
+function use(btn, id){ btn.querySelector('use').setAttribute('href', '#'+id); }
+
+function loadSrc(startAt, autoplay){
+  const src = srcOf(cur);
+  $('#err').hidden = !!src;
+  P.classList.toggle('nosrc', !src);
+  $('#err b').textContent = 'Pas encore de lien';
+  if (!src) { V.removeAttribute('src'); V.load(); return; }
+  V.src = src;
+  V.addEventListener('loadedmetadata', function f(){
+    V.removeEventListener('loadedmetadata', f);
+    if (startAt) V.currentTime = startAt;
+  });
+  if (autoplay) V.play().catch(() => {});
+}
+function renderPlayerLang(){
+  renderLang($('#langPl'), cur.sr, l => {
+    const t = V.currentTime, wasPlaying = !V.paused;
+    loadSrc(t, wasPlaying || !V.src);
+    flash(l); renderPlayerLang(); renderGrid();
+  });
+}
+function openPlayer(e){
+  cur = e;
+  cancelNext();
+  $('#pCode').textContent = `${e.sr.nom} · ${e.code}`;
+  $('#pTitle').textContent = e.t;
+  $('#pNext').hidden = !nextOf(e);
+  renderPlayerLang();
+  P.classList.add('open','opening'); P.setAttribute('aria-hidden','false');
+  setTimeout(() => P.classList.remove('opening'), 850);
+  document.body.style.overflow = 'hidden';
+  const p = prog[e.id];
+  loadSrc(p && p.t && p.d && p.t / p.d < .95 ? p.t : 0, true);
+  poke();
+}
+function closePlayer(){
+  persist();
+  V.pause();
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  P.classList.remove('open'); P.setAttribute('aria-hidden','true');
+  document.body.style.overflow = '';
+  cancelNext();
+  renderAll();
+}
+function persist(){
+  if (!cur || !V.duration || !isFinite(V.duration)) return;
+  prog[cur.id] = { t: V.currentTime, d: V.duration, at: Date.now() };
+  saveProg();
+}
+function toggle(){ if (!cur || !srcOf(cur)) return; V.paused ? V.play().catch(()=>{}) : V.pause(); }
+function skip(s){ if (!V.duration) return; V.currentTime = Math.max(0, Math.min(V.duration, V.currentTime + s)); flash((s>0?'+':'')+s+'s'); }
+function flash(txt){ const f = $('#flash'); f.textContent = txt; f.classList.add('on'); requestAnimationFrame(()=>requestAnimationFrame(()=>f.classList.remove('on'))); }
+
+function poke(){
+  P.classList.remove('idle');
+  clearTimeout(idleT);
+  idleT = setTimeout(() => { if (!V.paused) P.classList.add('idle'); }, 2600);
+}
+P.addEventListener('pointermove', poke);
+P.addEventListener('pointerdown', poke);
+
+V.addEventListener('play', () => { use($('#pPlay'),'i-pause'); $('#pBig').classList.add('hidden'); poke(); clearInterval(saveT); saveT = setInterval(persist, 5000); });
+V.addEventListener('pause', () => { use($('#pPlay'),'i-play'); $('#pBig').classList.remove('hidden'); P.classList.remove('idle'); persist(); clearInterval(saveT); });
+V.addEventListener('waiting', () => P.classList.add('loading'));
+['playing','canplay','pause','error'].forEach(ev => V.addEventListener(ev, () => P.classList.remove('loading')));
+V.addEventListener('timeupdate', () => {
+  const d = V.duration || 0, t = V.currentTime;
+  $('#fill').style.width = d ? (t/d*100)+'%' : 0;
+  $('#knob').style.left = d ? (t/d*100)+'%' : 0;
+  $('#pTime').textContent = `${fmt(t)} / ${fmt(d)}`;
+  if (V.buffered.length && d) $('#buf').style.width = (V.buffered.end(V.buffered.length-1)/d*100)+'%';
+  if (d && d - t < 20 && nextOf(cur) && !$('#next').classList.contains('on') && !V.paused && !nextDismissed) showNext(false);
+});
+V.addEventListener('ended', () => { persist(); if (nextOf(cur) && !nextDismissed) showNext(true); });
+V.addEventListener('error', () => { if (cur && srcOf(cur)){ $('#err').hidden = false; $('#err b').textContent = 'Lecture impossible'; } });
+
+$('#pBig').onclick = toggle;
+$('#pPlay').onclick = toggle;
+/* souris : clic = pause, double-clic = plein écran
+   tactile : tap = afficher/masquer les contrôles, double-tap sur les côtés = ±10 s */
+let lastPT = 'mouse', lastTap = 0, tapT;
+V.addEventListener('pointerdown', ev => { lastPT = ev.pointerType; });
+V.addEventListener('click', ev => {
+  if (lastPT !== 'touch') { toggle(); return; }
+  const now = Date.now(), x = ev.clientX / innerWidth;
+  if (now - lastTap < 300 && (x < .35 || x > .65)) {
+    clearTimeout(tapT);
+    const fwd = x > .5; skip(fwd ? 10 : -10);
+    const el = $(fwd ? '#tapR' : '#tapL'); el.classList.add('on');
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('on')));
+    lastTap = 0; return;
+  }
+  lastTap = now;
+  tapT = setTimeout(() => {
+    if (P.classList.contains('idle')) poke();
+    else if (!V.paused) { clearTimeout(idleT); P.classList.add('idle'); }
+  }, 260);
+});
+V.addEventListener('dblclick', () => { if (lastPT !== 'touch') fs(); });
+$('#pBack').onclick = () => skip(-10);
+$('#pFwd').onclick = () => skip(10);
+$('#pClose').onclick = closePlayer;
+$('#pNext').onclick = () => { persist(); const n = nextOf(cur); if (n) openPlayer(n); };
+$('#pFs').onclick = fs;
+function fs(){
+  if (document.fullscreenElement) { document.exitFullscreen().catch(()=>{}); return; }
+  if (P.requestFullscreen) {
+    P.requestFullscreen().then(() => screen.orientation?.lock?.('landscape').catch(()=>{})).catch(()=>{});
+  } else if (V.webkitEnterFullscreen) {
+    V.webkitEnterFullscreen(); // iPhone : plein écran natif
+  }
+}
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) try { screen.orientation?.unlock?.(); } catch(_) {} });
+
+const speeds = [1,1.25,1.5,2,.75];
+$('#pSpeed').onclick = () => { const i = (speeds.indexOf(V.playbackRate)+1) % speeds.length; V.playbackRate = speeds[i]; $('#pSpeed').textContent = speeds[i]+'×'; flash(speeds[i]+'×'); };
+$('#pVol').oninput = e => { V.volume = +e.target.value; V.muted = V.volume === 0; volIcon(); };
+$('#pMute').onclick = () => { V.muted = !V.muted; volIcon(); };
+function volIcon(){ use($('#pMute'), V.muted || V.volume===0 ? 'i-mute' : 'i-vol'); }
+
+/* seek bar */
+const SK = $('#seek');
+function ratio(ev){ const r = SK.getBoundingClientRect(); return Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)); }
+let dragging = false;
+SK.addEventListener('pointerdown', ev => { if (!V.duration) return; dragging = true; SK.setPointerCapture(ev.pointerId); V.currentTime = ratio(ev) * V.duration; });
+SK.addEventListener('pointermove', ev => {
+  const r = ratio(ev); const tip = $('#tip');
+  tip.style.left = (r*100)+'%'; tip.textContent = fmt(r * (V.duration||0));
+  if (dragging && V.duration) V.currentTime = r * V.duration;
+});
+SK.addEventListener('pointerup', () => dragging = false);
+SK.addEventListener('keydown', ev => { if (ev.key==='ArrowLeft'){skip(-5);ev.preventDefault()} if (ev.key==='ArrowRight'){skip(5);ev.preventDefault()} });
+
+/* next episode */
+let nextDismissed = false;
+function showNext(auto){
+  const n = nextOf(cur);
+  $('#nextTitle').textContent = `${n.code} · ${n.t}`;
+  $('#next').classList.add('on');
+  if (auto){
+    const bar = $('#nextBar'); bar.style.transition = 'none'; bar.style.width = '0';
+    requestAnimationFrame(() => { bar.style.transition = 'width 6s linear'; bar.style.width = '100%'; });
+    nextT = setTimeout(() => openPlayer(n), 6000);
+  }
+}
+function cancelNext(){ clearTimeout(nextT); $('#next').classList.remove('on'); nextDismissed = false; const b=$('#nextBar'); b.style.transition='none'; b.style.width='0'; }
+$('#nextGo').onclick = () => { persist(); openPlayer(nextOf(cur)); };
+$('#nextNo').onclick = () => { clearTimeout(nextT); $('#next').classList.remove('on'); nextDismissed = true; };
+
+/* keyboard */
+addEventListener('keydown', ev => {
+  if (!P.classList.contains('open') || ev.target.tagName === 'INPUT') return;
+  const k = ev.key.toLowerCase();
+  if (k===' '||k==='k'){ toggle(); ev.preventDefault(); }
+  else if (k==='arrowleft'||k==='j'){ skip(-10); ev.preventDefault(); }
+  else if (k==='arrowright'||k==='l'){ skip(10); ev.preventDefault(); }
+  else if (k==='arrowup'){ V.volume = Math.min(1, V.volume+.1); $('#pVol').value = V.volume; volIcon(); flash(Math.round(V.volume*100)+'%'); ev.preventDefault(); }
+  else if (k==='arrowdown'){ V.volume = Math.max(0, V.volume-.1); $('#pVol').value = V.volume; volIcon(); flash(Math.round(V.volume*100)+'%'); ev.preventDefault(); }
+  else if (k==='f') fs();
+  else if (k==='m'){ V.muted = !V.muted; volIcon(); }
+  else if (k==='n'){ $('#pNext').click(); }
+  else if (k==='escape' && !document.fullscreenElement) closePlayer();
+  poke();
+});
+addEventListener('pagehide', persist);
+
+/* ---------- embers (sprites pré-rendus, pas de shadowBlur) ---------- */
+(() => {
+  const c = $('#embers'), x = c.getContext('2d', { alpha: true });
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cols = ['255,31,75','255,79,163','255,140,60','255,194,75'];
+  // une petite image lumineuse par couleur, dessinée une seule fois
+  const sprites = cols.map(col => {
+    const s = document.createElement('canvas'); s.width = s.height = 32;
+    const g = s.getContext('2d'), gr = g.createRadialGradient(16,16,0,16,16,16);
+    gr.addColorStop(0, `rgba(${col},1)`); gr.addColorStop(.25, `rgba(${col},.8)`); gr.addColorStop(1, `rgba(${col},0)`);
+    g.fillStyle = gr; g.fillRect(0,0,32,32); return s;
+  });
+  let W, H, dpr, parts = [], running = false, last = 0;
+  function size(){ dpr = Math.min(1.5, devicePixelRatio || 1); W = c.width = Math.round(innerWidth*dpr); H = c.height = Math.round(innerHeight*dpr); }
+  const spawn = init => ({ x: Math.random()*W, y: init ? Math.random()*H : H + 20, r: (Math.random()*7+5)*dpr, vy: (Math.random()*.6+.25)*dpr, sw: Math.random()*6.3, a: Math.random()*.5+.35, sp: sprites[Math.random()*sprites.length|0] });
+  size();
+  let rT; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(size, 150); });
+  const N = reduce ? 25 : Math.min(70, Math.round(innerWidth/18));
+  for (let i=0;i<N;i++) parts.push(spawn(true));
+  function draw(dt){
+    x.clearRect(0,0,W,H);
+    x.globalCompositeOperation = 'lighter';
+    const k = Math.min(3, dt / 16.7);
+    for (const p of parts){
+      if (!reduce){ p.y -= p.vy * k; p.sw += .02 * k; p.x += Math.sin(p.sw) * .4 * dpr * k; }
+      if (p.y < -20) Object.assign(p, spawn(false));
+      x.globalAlpha = p.a * Math.min(1, p.y / H * 1.4);
+      x.drawImage(p.sp, p.x - p.r, p.y - p.r, p.r*2, p.r*2);
     }
-};
-
-const videos = {
-    hazbin: {
-        name: 'Hazbin Hotel',
-        saisons: {
-            1: {
-                background: 'https://images2.alphacoders.com/134/1348359.jpeg',
-                episodes: {
-                    1: { title: "Histoire De L'Enfer", VF: 'https://cold8.gofile.io/download/direct/f813c55e-facf-4e74-b291-bad048721f64/Hazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4', VOSTFR: 'https://cold2.gofile.io/download/direct/1e24501c-0f30-4925-8a7f-713020f8af63/%5BVOSTFR%5DHazbin%20Hotel%20S01e01%20Histoire%20De%20L%E2%80%99Enfer.mp4' },
-                    2: { title: "Radio Contre Vidéo", VF: 'https://cold-na-phx-2.gofile.io/download/direct/68c3dbb5-3405-4163-91c9-3311dbc4366a/Hazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4', VOSTFR: 'https://cold8.gofile.io/download/direct/175be20b-b002-42cd-b7b1-4afc27d0ac45/%5BVOSTFR%5DHazbin%20Hotel%20S01e02%20Radio%20Contre%20Vid%C3%A9o.mp4' },
-                    3: { title: "Oeufs Brouillés", VF: 'https://cold8.gofile.io/download/direct/321efd47-526d-46eb-a0af-7227c609697b/Hazbin%20Hotel%20S01e03%20Oeufs%20Brouill%C3%A9s.mp4', VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/9c175380-7011-41e5-8bcf-2778b985b67d/%5BVOSTFR%5DHazbin%20Hotel%20S01e03%20Oeufs%20Brouill%C3%A9s.mp4' },
-                    4: { title: "Mascarade", VF: 'https://cold4.gofile.io/download/direct/6187b010-4c33-4938-91ee-11eb68e2a288/Hazbin%20Hotel%20S01e04%20Mascarade.mp4', VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/74bce63b-9c1b-4a6d-8230-ee572424333f/%5BVOSTFR%5DHazbin%20Hotel%20S01e04%20Mascarade.mp4' },
-                    5: { title: "Lucifer Entre En Scène", VF: 'https://cold2.gofile.io/download/direct/2ec7cfd9-29f4-4752-bd15-a5035c79ed03/Hazbin%20Hotel%20S01e05%20Lucifer%20Entre%20En%20Sc%C3%A8ne.mp4', VOSTFR: 'https://cold-na-phx-1.gofile.io/download/direct/73583f43-07c8-4b97-8253-4055ba618655/%5BVOSTFR%5DHazbin%20Hotel%20S01e05%20Lucifer%20entre%20en%20sc%C3%A8ne.mp4' },
-                    6: { title: "Sur Les Chemins De La Rédemption", VF: 'https://cold8.gofile.io/download/direct/b5d92f58-b8b4-48ec-9287-00a71453b43d/Hazbin%20Hotel%20S01e06%20Sur%20Les%20Chemins%20De%20La%20R%C3%A9demption.mp4', VOSTFR: 'https://cold4.gofile.io/download/direct/8fccfa23-01d5-4de7-b367-16a79431319a/%5BVOSTFR%5DHazbin%20Hotel%20S01e06%20Sur%20Les%20Chemins%20De%20La%20R%C3%A9demption.mp4' },
-                    7: { title: "Hello Rosie!", VF: 'https://cold8.gofile.io/download/direct/0580c875-640b-4c6a-9201-8987f383b31b/Hazbin%20Hotel%20S01e07%20Hello%20Rosie!.mp4', VOSTFR: 'https://cold-na-phx-2.gofile.io/download/direct/02262a23-1f55-407c-884d-ea419d8134e3/%5BVOSTFR%5DHazbin%20Hotel%20S01e07%20Hello%20Rosie!.mp4' },
-                    8: { title: "Le Grand Final", VF: 'https://cold-na-phx-2.gofile.io/download/direct/4ff992e8-7d8d-4775-b762-b3d7f8e1a2a4/Hazbin%20Hotel%20S01e08%20Le%20grand%20final.mp4', VOSTFR: 'https://cold8.gofile.io/download/direct/483a7d0f-71e6-4f25-9dea-fdfd861035c4/%5BVOSTFR%5DHazbin%20Hotel%20S01e08%20Le%20Grand%20Final.mp4' }
-                }
-            },
-            2: {
-                background: 'https://images6.alphacoders.com/128/1285870.jpg',
-                episodes: {
-                    1: { title: "Pentious au Paradis", VF: 'https://cold2.gofile.io/download/direct/d6b94c60-903d-4bb2-8dd1-31188b7b57b2/S02E001_Pentious%20au%20Paradis.mp4', VOSTFR: 'https://store1.gofile.io/download/direct/fbaa37e6-5207-4dbf-8cd5-b6e60ee45ec6/S02E001_Pentious%20au%20Paradis.mp4' },
-                    2: { title: "L'histoire de Pentious", VF: 'https://store5.gofile.io/download/direct/d29f6629-b713-4da6-a1a6-e78671ede900/S02E002_Lhistoire%20de%20Pentious.mp4', VOSTFR: 'https://store-eu-par-6.gofile.io/download/direct/033fdea1-68d0-405a-88d6-6a2512bf3b38/S02E002_Lhistoire%20de%20Pentious.mp4' },
-                    3: { title: "L'envers du décor", VF: 'https://store5.gofile.io/download/direct/5f56ba4d-925e-4802-9d26-a365117c39e2/%5BVF%5D%20S02E003_Lenvers%20du%20d%C3%A9cor.mp4', VOSTFR: 'https://store-eu-par-6.gofile.io/download/direct/4c787aba-11a2-474c-9d96-a9a5f7f7f342/%5BVOSTFR%5D%20S02E003_Lenvers%20du%20d%C3%A9cor.mp4' },
-                    4: { title: "Marché conclu", VF: 'https://store10.gofile.io/download/direct/d32a157e-1d5e-436b-9fbd-aceec4b876e1/%5BVF%5D%20S02E004_March%C3%A9%20conclu.mp4', VOSTFR: 'https://store-eu-par-6.gofile.io/download/direct/88317e28-835f-4078-ba4c-20c1955a76fd/%5BVOSTFR%5D%20S02E004_March%C3%A9%20conclu.mp4' },
-                    5: { title: "Réduite au Silence", VF: 'https://store1.gofile.io/download/direct/887f6b52-b255-40a9-8d7b-0d5216222ad3/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4', VOSTFR: 'https://store5.gofile.io/download/direct/47943cd0-a512-47c6-a344-50e94830fc6e/Hazbin%20Hotel_S02E05_R%C3%A9duite%20au%20silence.mp4' },
-                    6: { title: "Pluie hurlante", VF: 'https://store5.gofile.io/download/direct/f4090ab9-3eb5-4087-8145-ed6bab18e4cd/Hazbin%20Hotel_S02E06_Pluie%20hurlante.mp4', VOSTFR: 'https://store4.gofile.io/download/direct/3ba1769d-9afc-4b49-8a41-5ba291055a7f/Hazbin%20Hotel_S02E06_Pluie%20Hurlante.mp4' },
-                    7: { title: "Arme De Destruction Massive", VF: 'https://store2.gofile.io/download/direct/5eff1f55-7988-441d-beff-460aa3f46b01/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VF.mp4', VOSTFR: 'https://store10.gofile.io/download/direct/a242db0b-3b78-4197-ad90-538dcae0ebd1/Hazbin%20Hotel_S02E07_Weapon%20of%20Mass%20Distraction%20VOTSFR.mp4' },
-                    8: { title: "Rappel", VF: 'https://cold-na-phx-7.gofile.io/download/direct/f6b1c039-3f1d-4072-b06e-3ed1f6b26585/S02E008_Rappel%20VF.mp4', VOSTFR: 'https://store-eu-par-2.gofile.io/download/direct/5539c571-6b62-4d66-809a-0e1c6d5569eb/S02E008_Rappel%20VOSTFR.mp4' }
-                }
-            }
-        }
-    },
-    helluva: {
-        name: 'Helluva Boss',
-        saisons: {
-            0: {
-                background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                episodes: { 1: { title: "Mission Zéro", VF: 'https://store-eu-par-1.gofile.io/download/direct/9999bcf7-ccf6-4c61-990d-d8e914f809db/clean_S01E001_MISSION%20Z%C3%89RO.mp4' } }
-            },
-            1: {
-                background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                episodes: {
-                    1: { title: "Une famille sanguinaire", VF: 'https://store5.gofile.io/download/direct/fd0e9d3c-7b6c-42a7-8544-7df3a7606454/new_S02E001_Une%20famille%20sanguinaire.mp4' },
-                    2: { title: "Loo Loo Land", VF: 'https://store-eu-par-3.gofile.io/download/direct/46b43239-6d3b-4b1b-8815-d353837c0145/new_S02E002_Loo%20Loo%20Land.mp4' },
-                    3: { title: "Duel de démons", VF: 'https://store5.gofile.io/download/direct/3afd5734-2d02-4369-9d09-b41efeece3bf/new_S02E003_Duel%20de%20d%C3%A9mons.mp4' },
-                    4: { title: "CHERUB", VF: 'https://store-eu-par-3.gofile.io/download/direct/b74d6870-6d2d-4300-bbad-f1c642554637/new_S02E004_CHERUB.mp4' },
-                    5: { title: "Le Festival de la Lune des Moissons", VF: 'https://store5.gofile.io/download/direct/b6be085b-3b81-41ce-9212-734b4a3f7aff/new_S02E005_Le%20Festival%20de%20la%20Lune%20des%20Moissons.mp4' },
-                    6: { title: "Chasseurs de démons", VF: 'https://store-eu-par-3.gofile.io/download/direct/bbfa7f44-8764-4ee0-9ca6-c726f5438aa2/new_S02E006_Chasseurs%20de%20d%C3%A9mons.mp4' },
-                    7: { title: "Chez Ozzie", VF: 'https://store5.gofile.io/download/direct/e5ff00cf-0610-4c5d-bde1-f7ee4adfa2a5/new_S02E007_Chez%20Ozzie.mp4' },
-                    8: { title: "Queen Bee", VF: 'https://store5.gofile.io/download/direct/2ce4739e-57e0-49d9-a9db-b3d278c01b77/new_S02E008_Queen%20Bee.mp4' }
-                }
-            },
-            2: {
-                background: 'https://images5.alphacoders.com/124/1246054.jpg',
-                episodes: {
-                    1: { title: "Le Cirque", VF: 'https://store5.gofile.io/download/direct/14f78d0e-1964-473c-b244-432850ca0312/new_S03E001_Le%20Cirque.mp4' },
-                    2: { title: "Sous les étoiles", VF: 'https://store5.gofile.io/download/direct/db857323-2848-4483-97d4-96009aaa654f/new_S03E002_Sous%20les%20%C3%A9toiles.mp4' },
-                    3: { title: "Un ex pour deux", VF: 'https://store5.gofile.io/download/direct/9e6b8d9b-7879-43f2-a15f-577b3f45f0a6/new_S03E003_Un%20ex%20pour%20deux.mp4' },
-                    4: { title: "Un air de western", VF: 'https://store5.gofile.io/download/direct/b18cfe0f-b61a-4455-87a8-ec54ff38b162/new_S03E004_Un%20air%20de%20western.mp4' },
-                    5: { title: "Un Camp d'Enfer", VF: 'https://store5.gofile.io/download/direct/0220c704-d945-462a-bcb0-fc7f9f0566ab/new_S03E005_Un%20Camp%20dEnfer.mp4' },
-                    6: { title: "Oups", VF: 'https://store5.gofile.io/download/direct/ced549b2-5da0-4758-a8a7-d48ac1eaa783/new_S03E006_Oups.mp4' },
-                    7: { title: "Ça c'est du spectacle", VF: 'https://store-eu-par-3.gofile.io/download/direct/e80ed01b-3de7-4daa-bf59-634e831019b4/new_S03E007_%C3%87a%20cest%20du%20spectacle.mp4' },
-                    8: { title: "La Pleine lune", VF: 'https://store5.gofile.io/download/direct/7420a991-a45d-4984-bbea-076a69a08074/new_S03E008_La%20Pleine%20lune.mp4' },
-                    9: { title: "La tournée des excuses", VF: 'https://store5.gofile.io/download/direct/1c0aee47-e69f-48d3-9a6a-fe9fa44e9a8c/new_S03E009_La%20tourn%C3%A9e%20des%20excuses.mp4' },
-                    10: { title: "Baise O S Fantômes", VF: 'https://store5.gofile.io/download/direct/ecdaaaca-2ae8-4432-9424-06e98b605e9f/new_S03E010_Baise%20O%20S%20Fant%C3%B4mes.mp4' },
-                    11: { title: "Le grand maître", VF: 'https://store5.gofile.io/download/direct/13eca112-eaf3-439f-885d-1c16f42bd62e/new_S03E011_Le%20grand%20ma%C3%AEtre.mp4' },
-                    12: { title: "La fête des Péchés", VF: 'https://store5.gofile.io/download/direct/423a0ac5-176b-4c5f-98c7-94c666b82700/new_S03E012_La%20f%C3%AAte%20des%20P%C3%A9ch%C3%A9s.mp4' }
-                }
-            }
-        }
-    }
-};
-
-// ============= STATE =============
-let view = 'series';
-let currentSerie = null;
-let currentSeason = null;
-let currentEpisode = null;
-let lang = localStorage.getItem('voxflix_lang') || 'VF';
-let pendingResume = null;
-let controlsTimer = null;
-
-// ============= STORAGE HELPERS =============
-const PROGRESS_KEY = 'voxflix_progress_v2';
-const RESUME_THRESHOLD = 10; // seconds — below this, don't bother saving
-const COMPLETED_THRESHOLD = 0.92; // 92% watched = complete
-
-function getProgress() {
-    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); }
-    catch { return {}; }
-}
-function saveProgress(serie, season, ep, time, duration) {
-    const p = getProgress();
-    const key = `${serie}_${season}_${ep}`;
-    if (time < RESUME_THRESHOLD || !duration) { delete p[key]; }
-    else if (time / duration >= COMPLETED_THRESHOLD) { p[key] = { completed: true, time: 0, duration }; }
-    else { p[key] = { time, duration, completed: false }; }
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
-}
-function getEpisodeProgress(serie, season, ep) {
-    const p = getProgress();
-    return p[`${serie}_${season}_${ep}`] || null;
-}
-
-// ============= DOM =============
-const app = document.getElementById('app');
-const backBtn = document.getElementById('backBtn');
-const homeBtn = document.getElementById('homeBtn');
-const homeLogo = document.getElementById('homeLogo');
-const langBtn = document.getElementById('langBtn');
-const langBtnText = document.getElementById('langBtnText');
-const playerContainer = document.getElementById('playerContainer');
-const video = document.getElementById('videoPlayer');
-const playerTitle = document.getElementById('playerTitle');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const playIcon = document.getElementById('playIcon');
-const pauseIcon = document.getElementById('pauseIcon');
-const muteBtn = document.getElementById('muteBtn');
-const volumeIcon = document.getElementById('volumeIcon');
-const mutedIcon = document.getElementById('mutedIcon');
-const volumeSlider = document.getElementById('volumeSlider');
-const timeline = document.getElementById('timeline');
-const timelineProgress = document.getElementById('timelineProgress');
-const timeDisplay = document.getElementById('timeDisplay');
-const fullscreenBtn = document.getElementById('fullscreenBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const exitBtn = document.getElementById('exitBtn');
-const langSelectorBtn = document.getElementById('langSelectorBtn');
-const langOverlay = document.getElementById('langOverlay');
-const langOptionsList = document.getElementById('langOptionsList');
-const closeLangBtn = document.getElementById('closeLangBtn');
-const nextOverlay = document.getElementById('nextOverlay');
-const nextEpisodeBtn = document.getElementById('nextEpisodeBtn');
-const closeNextBtn = document.getElementById('closeNextBtn');
-const resumeOverlay = document.getElementById('resumeOverlay');
-const resumeBtn = document.getElementById('resumeBtn');
-const restartBtn = document.getElementById('restartBtn');
-const resumeTitle = document.getElementById('resumeTitle');
-const resumeTime = document.getElementById('resumeTime');
-
-// ============= INIT =============
-function init() {
-    setTimeout(() => render(), 300);
-
-    backBtn.addEventListener('click', goBack);
-    homeBtn.addEventListener('click', goHome);
-    homeLogo.addEventListener('click', goHome);
-    langBtn.addEventListener('click', toggleLang);
-
-    playPauseBtn.addEventListener('click', togglePlay);
-    muteBtn.addEventListener('click', toggleMute);
-    volumeSlider.addEventListener('input', e => {
-        video.volume = e.target.value;
-        video.muted = e.target.value == 0;
-        updateMuteIcon();
-    });
-    timeline.addEventListener('click', seek);
-    fullscreenBtn.addEventListener('click', toggleFullscreen);
-    exitBtn.addEventListener('click', exitPlayer);
-
-    langSelectorBtn.addEventListener('click', openLangSelector);
-    closeLangBtn.addEventListener('click', () => langOverlay.classList.add('hidden'));
-    nextEpisodeBtn.addEventListener('click', playNext);
-    closeNextBtn.addEventListener('click', () => nextOverlay.classList.add('hidden'));
-    resumeBtn.addEventListener('click', confirmResume);
-    restartBtn.addEventListener('click', restartFromZero);
-
-    video.addEventListener('click', togglePlay);
-    video.addEventListener('timeupdate', updateTimeline);
-    video.addEventListener('loadedmetadata', updateDuration);
-    video.addEventListener('ended', handleEnd);
-    video.addEventListener('play', () => updatePlayIcon(true));
-    video.addEventListener('pause', () => updatePlayIcon(false));
-
-    // Save progress periodically
-    setInterval(() => {
-        if (view === 'player' && !video.paused && video.duration) {
-            saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
-        }
-    }, 5000);
-    window.addEventListener('beforeunload', () => {
-        if (view === 'player' && video.duration) {
-            saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
-        }
-    });
-
-    document.addEventListener('keydown', handleKey);
-    document.addEventListener('mousemove', resetControlsTimer);
-    document.addEventListener('touchstart', resetControlsTimer);
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js').catch(() => {});
-    }
-}
-
-// ============= RENDER =============
-function render() {
-    if (view === 'series') renderSeries();
-    else if (view === 'seasons') renderSeasons();
-    else if (view === 'episodes') renderEpisodes();
-    updateNav();
-}
-
-function renderSeries() {
-    const heroSerie = videos.hazbin;
-    const heroBg = Object.values(heroSerie.saisons)[0].background;
-    const heroMeta = SERIES_META.hazbin;
-
-    const cards = Object.entries(videos).map(([key, serie], i) => {
-        const meta = SERIES_META[key] || { name: serie.name, tagline: '', logo: '' };
-        const bg = Object.values(serie.saisons)[0].background;
-        const seasonCount = Object.keys(serie.saisons).length;
-        const episodeCount = Object.values(serie.saisons).reduce((n, s) => n + Object.keys(s.episodes).length, 0);
-        return `
-            <div class="serie-card" onclick="selectSerie('${key}')" style="animation: fadeInUp 0.6s ${i * 0.1}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
-                <div class="serie-card-bg"><img src="${bg}" alt="${meta.name}" loading="lazy"></div>
-                <div class="serie-card-overlay">
-                    <div class="serie-logo-wrap">
-                        <img src="${meta.logo}" alt="${meta.name}" onerror="this.outerHTML='<h3 style=&quot;font-family:var(--display);font-size:2.25rem;font-weight:600;font-style:italic;letter-spacing:-0.02em;color:#fff&quot;>${meta.name}</h3>'">
-                    </div>
-                    <div class="serie-meta">
-                        <span class="serie-tag">${seasonCount} saison${seasonCount > 1 ? 's' : ''}</span>
-                        <span class="serie-tag">${episodeCount} épisodes</span>
-                        <span class="serie-cta">
-                            Regarder
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </span>
-                    </div>
-                </div>
-            </div>`;
-    }).join('');
-
-    app.innerHTML = `
-        <section class="hero">
-            <div class="hero-bg"><img src="${heroBg}" alt=""></div>
-            <div class="hero-content">
-                <div class="hero-eyebrow">VoxFlix · Streaming</div>
-                <h1 class="hero-title">Bienvenue dans <em>l'enfer</em>.</h1>
-                <p class="hero-sub">L'intégrale de Hazbin Hotel et Helluva Boss. Sans pub, sans compte, juste le show — en VF et VOSTFR quand c'est dispo.</p>
-            </div>
-        </section>
-        <section class="section">
-            <div class="section-head">
-                <h2 class="section-title">Les <em>séries</em></h2>
-                <span class="section-meta">${Object.keys(videos).length} disponibles</span>
-            </div>
-            <div class="series-grid">${cards}</div>
-        </section>`;
-}
-
-function renderSeasons() {
-    const serie = videos[currentSerie];
-    const meta = SERIES_META[currentSerie] || {};
-    const seasons = Object.entries(serie.saisons).map(([num, s], i) => {
-        const epCount = Object.keys(s.episodes).length;
-        const watchedCount = Object.keys(s.episodes).filter(ep => {
-            const p = getEpisodeProgress(currentSerie, num, ep);
-            return p && p.completed;
-        }).length;
-        return `
-            <div class="season-card" onclick="selectSeason('${num}')" style="animation: fadeInUp 0.5s ${i * 0.08}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
-                <div class="season-card-bg"><img src="${s.background}" alt="Saison ${num}" loading="lazy"></div>
-                <div class="season-card-content">
-                    <div></div>
-                    <div>
-                        <div class="season-num">
-                            <small>${num === '0' ? 'Pilote' : 'Saison'}</small>
-                            ${num === '0' ? '00' : String(num).padStart(2, '0')}
-                        </div>
-                        <div class="season-info" style="margin-top:1rem">
-                            <span class="season-info-text"><strong>${epCount}</strong> ${epCount > 1 ? 'épisodes' : 'épisode'}</span>
-                            ${watchedCount > 0 ? `<span class="season-info-text">${watchedCount}/${epCount} vu${watchedCount > 1 ? 's' : ''}</span>` : ''}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-    }).join('');
-
-    app.innerHTML = `
-        <section class="section" style="padding-top:2rem">
-            <div style="margin-bottom:2rem;animation:fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)">
-                <div class="hero-eyebrow" style="margin-bottom:0.75rem">${meta.tagline || ''}</div>
-                <h2 style="font-family:var(--display);font-size:clamp(2rem,5vw,3rem);font-weight:400;letter-spacing:-0.03em;line-height:1">
-                    ${serie.name}
-                </h2>
-            </div>
-            <div class="section-head">
-                <h3 class="section-title"><em>Saisons</em></h3>
-                <span class="section-meta">${Object.keys(serie.saisons).length} dispo.</span>
-            </div>
-            <div class="seasons-grid">${seasons}</div>
-        </section>`;
-}
-
-function renderEpisodes() {
-    const serie = videos[currentSerie];
-    const season = serie.saisons[currentSeason];
-    const eps = Object.entries(season.episodes).map(([num, ep], i) => {
-        const hasVF = ep.VF && ep.VF !== '';
-        const hasVOSTFR = ep.VOSTFR && ep.VOSTFR !== '';
-        const url = ep.VF || ep.VOSTFR || '';
-        const progress = getEpisodeProgress(currentSerie, currentSeason, num);
-        const watched = progress && progress.completed;
-        const partial = progress && !progress.completed && progress.time > 0;
-        const progressPct = partial ? (progress.time / progress.duration) * 100 : 0;
-        return `
-            <div class="episode-row ${watched ? 'watched' : ''}" onclick="play('${num}')" style="animation: fadeInUp 0.4s ${i * 0.04}s backwards cubic-bezier(0.16, 1, 0.3, 1)">
-                <div class="episode-num">${String(num).padStart(2, '0')}</div>
-                <div class="episode-thumb">
-                    ${url ? `<video src="${url}#t=30" preload="metadata" muted></video>` : '<div class="episode-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:24px;height:24px"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>'}
-                    <div class="episode-play-overlay">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    </div>
-                </div>
-                <div class="episode-info">
-                    <div class="episode-title">${ep.title || `Épisode ${num}`}</div>
-                    <div class="episode-tags">
-                        ${hasVF ? '<span class="lang-pill">VF</span>' : ''}
-                        ${hasVOSTFR ? '<span class="lang-pill vostfr">VOSTFR</span>' : ''}
-                        ${watched ? '<span class="lang-pill" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border-color:var(--border)">✓ Vu</span>' : ''}
-                        ${partial ? `<span class="lang-pill" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border-color:var(--border)">${Math.round(progressPct)}%</span>` : ''}
-                    </div>
-                </div>
-                <div class="episode-action">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M9 18l6-6-6-6"/></svg>
-                </div>
-                ${partial ? `<div class="episode-progress-bar" style="width:${progressPct}%"></div>` : ''}
-            </div>`;
-    }).join('');
-
-    app.innerHTML = `
-        <section class="section" style="padding-top:2rem">
-            <div style="margin-bottom:2rem;animation:fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)">
-                <div class="hero-eyebrow" style="margin-bottom:0.5rem">${serie.name}</div>
-                <h2 style="font-family:var(--display);font-size:clamp(1.75rem,4.5vw,2.5rem);font-weight:400;font-style:italic;letter-spacing:-0.02em">
-                    ${currentSeason === '0' ? 'Pilote' : `Saison ${String(currentSeason).padStart(2, '0')}`}
-                </h2>
-            </div>
-            <div class="episodes-list">${eps}</div>
-        </section>`;
-}
-
-// ============= NAV =============
-window.selectSerie = key => { currentSerie = key; view = 'seasons'; render(); window.scrollTo(0,0); };
-window.selectSeason = num => { currentSeason = num; view = 'episodes'; render(); window.scrollTo(0,0); };
-
-window.play = epNum => {
-    currentEpisode = epNum;
-    const ep = videos[currentSerie].saisons[currentSeason].episodes[epNum];
-    let url = ep[lang];
-    if (!url) url = ep.VF || ep.VOSTFR;
-    if (!url) { alert('Aucune version disponible'); return; }
-
-    // Check resume
-    const progress = getEpisodeProgress(currentSerie, currentSeason, epNum);
-    if (progress && !progress.completed && progress.time >= RESUME_THRESHOLD) {
-        pendingResume = { url, time: progress.time };
-        resumeTitle.textContent = ep.title || `Épisode ${epNum}`;
-        resumeTime.textContent = formatTime(progress.time);
-        view = 'player';
-        showPlayer();
-        video.src = url;
-        downloadBtn.href = url;
-        playerTitle.textContent = `${videos[currentSerie].name} · S${currentSeason}E${epNum} · ${ep.title || ''}`;
-        resumeOverlay.classList.remove('hidden');
-        updateNav();
-    } else {
-        startPlayback(url, 0, ep);
-    }
-};
-
-function startPlayback(url, time, ep) {
-    video.src = url;
-    downloadBtn.href = url;
-    playerTitle.textContent = `${videos[currentSerie].name} · S${currentSeason}E${currentEpisode} · ${ep.title || ''}`;
-    view = 'player';
-    showPlayer();
-    if (time > 0) {
-        video.addEventListener('loadedmetadata', () => { video.currentTime = time; }, { once: true });
-    }
-    video.play().catch(() => {});
-    updateNav();
-}
-
-function confirmResume() {
-    if (!pendingResume) return;
-    video.addEventListener('loadedmetadata', () => { video.currentTime = pendingResume.time; }, { once: true });
-    video.play().catch(() => {});
-    resumeOverlay.classList.add('hidden');
-    pendingResume = null;
-}
-function restartFromZero() {
-    video.currentTime = 0;
-    video.play().catch(() => {});
-    resumeOverlay.classList.add('hidden');
-    pendingResume = null;
-}
-
-function showPlayer() {
-    document.body.style.overflow = 'hidden';
-    playerContainer.classList.remove('hidden');
-    resetControlsTimer();
-}
-function hidePlayer() {
-    document.body.style.overflow = '';
-    playerContainer.classList.add('hidden');
-    nextOverlay.classList.add('hidden');
-    langOverlay.classList.add('hidden');
-    resumeOverlay.classList.add('hidden');
-    if (video.duration) saveProgress(currentSerie, currentSeason, currentEpisode, video.currentTime, video.duration);
-    video.pause();
-    video.removeAttribute('src');
-    video.load();
-}
-
-function exitPlayer() { hidePlayer(); view = 'episodes'; render(); }
-function goBack() {
-    if (view === 'player') exitPlayer();
-    else if (view === 'episodes') { view = 'seasons'; render(); }
-    else if (view === 'seasons') { view = 'series'; render(); }
-}
-function goHome() {
-    if (view === 'player') hidePlayer();
-    view = 'series';
-    currentSerie = currentSeason = currentEpisode = null;
-    render();
-}
-
-function updateNav() {
-    backBtn.classList.toggle('hidden', view === 'series');
-    const showLang = view === 'player' && currentSerie === 'hazbin';
-    langBtn.classList.toggle('hidden', !showLang);
-    langBtnText.textContent = lang;
-    langSelectorBtn.style.display = showLang ? 'flex' : 'none';
-}
-
-// ============= PLAYER CONTROLS =============
-function togglePlay() {
-    if (video.paused) video.play().catch(() => {});
-    else video.pause();
-}
-function updatePlayIcon(playing) {
-    playIcon.classList.toggle('hidden', playing);
-    pauseIcon.classList.toggle('hidden', !playing);
-}
-function toggleMute() {
-    video.muted = !video.muted;
-    updateMuteIcon();
-}
-function updateMuteIcon() {
-    volumeIcon.classList.toggle('hidden', video.muted || video.volume === 0);
-    mutedIcon.classList.toggle('hidden', !(video.muted || video.volume === 0));
-}
-function seek(e) {
-    const rect = timeline.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    if (video.duration) video.currentTime = pct * video.duration;
-}
-function updateTimeline() {
-    if (!video.duration) return;
-    const pct = (video.currentTime / video.duration) * 100;
-    timelineProgress.style.width = pct + '%';
-    timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
-}
-function updateDuration() {
-    timeDisplay.textContent = '0:00 / ' + formatTime(video.duration);
-}
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        (playerContainer.requestFullscreen ? playerContainer.requestFullscreen() : video.requestFullscreen()).catch(() => {});
-    } else {
-        document.exitFullscreen();
-    }
-}
-function handleEnd() {
-    if (video.duration) saveProgress(currentSerie, currentSeason, currentEpisode, video.duration, video.duration);
-    const eps = videos[currentSerie].saisons[currentSeason].episodes;
-    const next = String(parseInt(currentEpisode) + 1);
-    if (eps[next]) nextOverlay.classList.remove('hidden');
-}
-function playNext() {
-    nextOverlay.classList.add('hidden');
-    const next = String(parseInt(currentEpisode) + 1);
-    if (videos[currentSerie].saisons[currentSeason].episodes[next]) play(next);
-}
-
-function toggleLang() {
-    const newLang = lang === 'VF' ? 'VOSTFR' : 'VF';
-    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
-    if (!ep[newLang]) return;
-    lang = newLang;
-    localStorage.setItem('voxflix_lang', lang);
-    langBtnText.textContent = lang;
-    const t = video.currentTime;
-    const wasPlaying = !video.paused;
-    video.src = ep[lang];
-    downloadBtn.href = ep[lang];
-    video.addEventListener('loadedmetadata', () => {
-        video.currentTime = t;
-        if (wasPlaying) video.play().catch(() => {});
-    }, { once: true });
-}
-
-function openLangSelector() {
-    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
-    const hasVF = ep.VF && ep.VF !== '';
-    const hasVOSTFR = ep.VOSTFR && ep.VOSTFR !== '';
-    langOptionsList.innerHTML = `
-        <div class="lang-option ${lang === 'VF' ? 'active' : ''} ${!hasVF ? 'disabled' : ''}" ${hasVF ? 'onclick="selectLang(\'VF\')"' : ''}>
-            <div>
-                <div class="lang-option-label">Version Française</div>
-                <div class="lang-option-sub">${hasVF ? 'VF' : 'Non disponible'}</div>
-            </div>
-            ${lang === 'VF' && hasVF ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-        </div>
-        <div class="lang-option ${lang === 'VOSTFR' ? 'active' : ''} ${!hasVOSTFR ? 'disabled' : ''}" ${hasVOSTFR ? 'onclick="selectLang(\'VOSTFR\')"' : ''}>
-            <div>
-                <div class="lang-option-label">Version Originale Sous-titrée</div>
-                <div class="lang-option-sub">${hasVOSTFR ? 'VOSTFR' : 'Non disponible'}</div>
-            </div>
-            ${lang === 'VOSTFR' && hasVOSTFR ? '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-        </div>`;
-    langOverlay.classList.remove('hidden');
-}
-
-window.selectLang = newLang => {
-    if (lang === newLang) { langOverlay.classList.add('hidden'); return; }
-    const ep = videos[currentSerie].saisons[currentSeason].episodes[currentEpisode];
-    if (!ep[newLang]) return;
-    lang = newLang;
-    localStorage.setItem('voxflix_lang', lang);
-    langBtnText.textContent = lang;
-    const t = video.currentTime;
-    const wasPlaying = !video.paused;
-    video.src = ep[newLang];
-    downloadBtn.href = ep[newLang];
-    video.addEventListener('loadedmetadata', () => {
-        video.currentTime = t;
-        if (wasPlaying) video.play().catch(() => {});
-    }, { once: true });
-    langOverlay.classList.add('hidden');
-};
-
-function formatTime(s) {
-    if (isNaN(s) || !isFinite(s)) return '0:00';
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = Math.floor(s % 60);
-    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-    return `${m}:${String(sec).padStart(2, '0')}`;
-}
-
-function handleKey(e) {
-    if (view !== 'player') return;
-    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-    else if (e.code === 'ArrowRight') { e.preventDefault(); video.currentTime = Math.min((video.duration||0), video.currentTime + 10); }
-    else if (e.code === 'ArrowLeft') { e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 10); }
-    else if (e.code === 'KeyM') { e.preventDefault(); toggleMute(); }
-    else if (e.code === 'KeyF') { e.preventDefault(); toggleFullscreen(); }
-    else if (e.code === 'Escape') { if (!document.fullscreenElement) exitPlayer(); }
-}
-
-function resetControlsTimer() {
-    if (view !== 'player') return;
-    playerContainer.classList.remove('hide-controls');
-    clearTimeout(controlsTimer);
-    controlsTimer = setTimeout(() => {
-        if (!video.paused && !langOverlay.matches(':not(.hidden)') && !nextOverlay.matches(':not(.hidden)') && !resumeOverlay.matches(':not(.hidden)')) {
-            playerContainer.classList.add('hide-controls');
-        }
-    }, 3000);
-}
-
-// GO
-init();
-</script>
-</body>
-</html>
+    x.globalAlpha = 1;
+  }
+  function frame(t){
+    if (!running) return;
+    draw(last ? t - last : 16.7); last = t;
+    requestAnimationFrame(frame);
+  }
+  function update(){
+    const should = !reduce && !document.hidden && !P.classList.contains('open');
+    if (should && !running){ running = true; last = 0; requestAnimationFrame(frame); }
+    if (!should) running = false;
+  }
+  draw(16.7);
+  document.addEventListener('visibilitychange', update);
+  new MutationObserver(update).observe(P, { attributes: true, attributeFilter: ['class'] });
+  update();
+})();
+</script><script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="af4526a2-bf7d-4ec5-806f-1e155e97954e" data-app-host="app.netlify.com" data-account-tier="free"></script>
